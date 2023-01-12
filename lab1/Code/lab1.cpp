@@ -31,11 +31,10 @@ int main(int argc , char *argv[]) {
     // Create each thread, and wait on their return values
     for (int i=0; i<thread_cnt; i++) {
         pthread_create(&threads[i], NULL, threadfunc, (void *) i);
-        pthread_join(threads[i], return_val);
     }
 
     for (int i = 0; i < thread_cnt; i++) {
-        pthread_join(threads[i], NULL);
+        pthread_join(threads[i], return_val);
     }
 
     return 0;
