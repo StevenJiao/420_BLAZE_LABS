@@ -5,7 +5,7 @@ LAB1_OBJECTS = lab1.o
 # SERVER_OBJECTS = server.o helpers.o
 
 lab1: lab1.o
-	$(CC) $(CFLAGS) $(LAB1_OBJECTS) -o lab1
+	$(CC) $(CFLAGS) $(LAB1_OBJECTS) -o main
 
 # Create object (.o) files
 lab1.o: lab1.cpp
