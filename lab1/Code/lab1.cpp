@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <pthread.h>
-
+#include <stdlib.h>
 
 
 void* threadfunc (void* arg_p){}
@@ -26,8 +26,7 @@ int main(int argc , char *argv[]) {
 
     printf("It works!\n");
 
-    // Placeholder
-    int thread_cnt = 4;
+    int thread_cnt = strtol(argv[1], nullptr, 0);
     pthread_t threads[thread_cnt];
     void** return_val;
 
