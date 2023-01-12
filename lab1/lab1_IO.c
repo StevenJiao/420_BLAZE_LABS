@@ -97,3 +97,20 @@ int Lab1_saveoutput(int **C, int *n, double Time)
     return 0;
 }
  
+int create_pthread()
+{
+/*
+    Spawn a pthread to operate on a set of matrix cells
+
+    -----
+    Input:
+    
+    -----
+    Output:
+
+    -----
+    Example:
+*/
+
+
+}
