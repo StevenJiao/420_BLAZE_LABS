@@ -9,6 +9,7 @@
 int **A, **B, **C, n;
 
 double start, end;
+
 void* threadfunc (void* arg_p){
     int i = ((int*) arg_p)[0];
     int thread_cnt = ((int*) arg_p)[1];
@@ -39,7 +40,7 @@ int largest_factor(int p) {
 
     // if we didn't find one, return a count of 1
     return 1;
-void* threadfunc (void* arg_p){}
+}
 
 int main(int argc , char *argv[]) {
 
