@@ -4,10 +4,11 @@
 #include <math.h>
 
 #include "lab1_IO.c"
-
+#include "timer.h"
 
 int **A, **B, **C, n;
 
+double start, end;
 void* threadfunc (void* arg_p){
     int i = ((int*) arg_p)[0];
     int thread_cnt = ((int*) arg_p)[1];
@@ -38,7 +39,7 @@ int largest_factor(int p) {
 
     // if we didn't find one, return a count of 1
     return 1;
-}
+void* threadfunc (void* arg_p){}
 
 int main(int argc , char *argv[]) {
 
@@ -56,8 +57,6 @@ int main(int argc , char *argv[]) {
     Example:
     */
 
-    printf("It works!\n");
-
     // Get matrix data
     Lab1_loadinput(&A, &B, &n);
 
@@ -70,6 +69,9 @@ int main(int argc , char *argv[]) {
     pthread_t threads[thread_cnt];
     void** return_val;
 
+    // Start timing
+    GET_TIME(start);
+
     // Create each thread, and wait on their return values
     for (int i=0; i<thread_cnt; i++) {
         int input[2] = {i, thread_cnt};
@@ -81,6 +83,12 @@ int main(int argc , char *argv[]) {
     for (int i = 0; i < thread_cnt; i++) {
         pthread_join(threads[i], return_val);
     }
+
+    // End timing
+    GET_TIME(end)
+
+    // Output result
+    Lab1_saveoutput(C, &n, end-start);
 
     return 0;
 }
