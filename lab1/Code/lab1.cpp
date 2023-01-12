@@ -26,12 +26,15 @@ int main(int argc , char *argv[]) {
 
     printf("It works!\n");
 
-
+    // Placeholder
     int thread_cnt = 4;
     pthread_t threads[thread_cnt];
+    void** return_val;
 
     for (int i=0; i<thread_cnt; i++) {
         pthread_create(&threads[i], NULL, threadfunc, (void *) i);
+        pthread_join(threads[i], return_val);
+
     }
 
 
