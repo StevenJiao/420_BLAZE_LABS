@@ -97,13 +97,14 @@ int Lab1_saveoutput(int **C, int *n, double Time)
     return 0;
 }
  
-int create_pthread()
+int main(int thread_cnt)
 {
 /*
-    Spawn a pthread to operate on a set of matrix cells
+    Spawn a set of pthreads to operate on a set of matrix cells
 
     -----
     Input:
+    int thread_cnt      number of threads to be used
     
     -----
     Output:
@@ -112,5 +113,6 @@ int create_pthread()
     Example:
 */
 
+    pthread_t* thread_p;
 
 }
