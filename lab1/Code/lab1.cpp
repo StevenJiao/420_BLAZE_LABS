@@ -3,9 +3,11 @@
 #include <stdlib.h>
 
 #include "lab1_IO.c"
-
+#include "timer.h"
 
 int **A, **B, **C, n;
+
+double start, end;
 
 void* threadfunc (void* arg_p){}
 
@@ -35,6 +37,9 @@ int main(int argc , char *argv[]) {
     pthread_t threads[thread_cnt];
     void** return_val;
 
+    // Start timing
+    GET_TIME(start);
+
     // Create each thread, and wait on their return values
     for (int i=0; i<thread_cnt; i++) {
         pthread_create(&threads[i], NULL, threadfunc, (void *) i);
@@ -43,6 +48,12 @@ int main(int argc , char *argv[]) {
     for (int i = 0; i < thread_cnt; i++) {
         pthread_join(threads[i], return_val);
     }
+
+    // End timing
+    GET_TIME(end)
+
+    // Output result
+    Lab1_saveoutput(C, &n, end-start);
 
     return 0;
 }
