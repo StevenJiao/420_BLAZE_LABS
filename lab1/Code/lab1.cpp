@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "lab1_IO.c"
 #include "timer.h"
@@ -42,9 +43,14 @@ int main(int argc , char *argv[]) {
 
     // Create each thread, and wait on their return values
     for (int i=0; i<thread_cnt; i++) {
+        // calculate the row(x) and col(y) for the thread to work on in the matrix
+        int x = floor(i/(int)sqrt(thread_cnt));
+        int y = i % (int)sqrt(thread_cnt);
+
         pthread_create(&threads[i], NULL, threadfunc, (void *) i);
     }
 
+    // Join each thread, get output in return_val
     for (int i = 0; i < thread_cnt; i++) {
         pthread_join(threads[i], return_val);
     }
