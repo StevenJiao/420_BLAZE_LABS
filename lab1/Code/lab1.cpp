@@ -40,6 +40,7 @@ int main(int argc , char *argv[]) {
         pthread_create(&threads[i], NULL, threadfunc, (void *) i);
     }
 
+    // Join each thread, get output in return_val
     for (int i = 0; i < thread_cnt; i++) {
         pthread_join(threads[i], return_val);
     }
