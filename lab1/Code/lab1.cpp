@@ -34,6 +34,9 @@ int main(int argc , char *argv[]) {
         pthread_create(&threads[i], NULL, threadfunc, (void *) i);
     }
 
+    for (int i = 0; i < thread_cnt; i++) {
+        pthread_join(threads[i], NULL);
+    }
 
     return 0;
 
