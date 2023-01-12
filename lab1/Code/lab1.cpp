@@ -28,8 +28,6 @@ int main(int argc , char *argv[]) {
     Example:
     */
 
-    printf("It works!\n");
-
     // Get matrix data
     Lab1_loadinput(&A, &B, &n);
 
