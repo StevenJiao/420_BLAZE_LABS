@@ -2,6 +2,10 @@
 #include <pthread.h>
 #include <stdlib.h>
 
+#include "lab1_IO.c"
+
+
+int **A, **B, **C;
 
 void* threadfunc (void* arg_p){}
 
@@ -22,6 +26,9 @@ int main(int argc , char *argv[]) {
     */
 
     printf("It works!\n");
+
+    // Get matrix data
+
 
     // Get the thread count from cmd, initialize threads and return vars
     int thread_cnt = strtol(argv[1], nullptr, 0);
