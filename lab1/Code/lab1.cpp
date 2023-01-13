@@ -18,10 +18,14 @@ void* threadfunc (void* arg_p){
     int x = floor(i/(int)sqrt(thread_cnt));
     int y = i % (int)sqrt(thread_cnt);
 
-    // calculate the lower bound and upper bound for i
-    
-
-    // calculate lower and upper bound for j
+    int factor = (n/sqrt(thread_cnt));
+    for (int i = factor*x; i <= factor*(x+1)-1; i++) {
+        for (int j = factor*y; j <= factor*(j+1)-1; j++) {
+            C[i][j] = 0;
+            for (int k = 0; k < n; k++)
+                C[i][j] += A[i][k] * B[k][j];
+        }
+    }
 }
 
 int largest_factor(int p) {
