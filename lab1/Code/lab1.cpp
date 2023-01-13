@@ -66,10 +66,7 @@ int main(int argc , char *argv[]) {
     Lab1_loadinput(&A, &B, &n);
 
     // Get the thread count from cmd, initialize threads and return vars
-    int thread_cnt = strtol(argv[1], nullptr, 0);
-
-    // get the largest number that is both a square and factor of n^2
-    int thread_cnt = largest_factor(thread_cnt);
+    int thread_cnt = largest_factor(strtol(argv[1], nullptr, 0));
 
     pthread_t threads[thread_cnt];
     void** return_val;
