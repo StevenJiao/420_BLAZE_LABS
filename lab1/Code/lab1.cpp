@@ -8,7 +8,7 @@ extern "C" {
 }
 #include "timer.h"
 
-int **A, **B, **C, n;
+int **A; int**B; int** C; int n;
 
 double start, end;
 
@@ -24,7 +24,7 @@ void* threadfunc (void* arg_p){
     for (int i = factor*x; i <= factor*(x+1)-1; i++) {
         for (int j = factor*y; j <= factor*(j+1)-1; j++) {
             C[i][j] = 0;
-            for (int k = 0; k < n; k++)
+            for (int k = factor*x; k <= factor*(j+1)-1; k++)
                 C[i][j] += A[i][k] * B[k][j];
         }
     }
