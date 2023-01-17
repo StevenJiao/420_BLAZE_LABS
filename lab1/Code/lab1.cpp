@@ -3,7 +3,9 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "lab1_IO.c"
+extern "C" {
+    #include "lab1_IO.h"
+}
 #include "timer.h"
 
 int **A, **B, **C, n;

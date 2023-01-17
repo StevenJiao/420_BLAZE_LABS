@@ -1,30 +1,33 @@
-CC=g++
-CFLAGS= -O -Wall
-LAB1_OBJECTS = lab1.o
-# CLIENT_OBJECTS = client.o helpers.o
-# SERVER_OBJECTS = server.o helpers.o
+CC = gcc
+CXX = g++
+CFLAGS = -Wall -c
+CXXFLAGS = -Wall
+LAB1_OBJECTS = lab1.o lab1_IO.o
 
-lab1: lab1.o
-	$(CC) $(CFLAGS) $(LAB1_OBJECTS) -o main
+# Link and create executable
+lab1: ${LAB1_OBJECTS}
+	$(CXX) $(LAB1_OBJECTS) -o main -lpthread
 
 # Create object (.o) files
 lab1.o: lab1.cpp
-	$(CC) $(CFLAGS) -c lab1.cpp -o lab1.o
+	$(CXX) $(CXXFLAGS) -c lab1.cpp -o lab1.o
 
+lab1_IO.o: lab1_IO.c
+	${CC} ${CFLAGS} -c lab1_IO.c -o lab1_IO.o
+
+# Generate matrixgen and serialtester executables
 utils: matrix serial
 
-# Generate matrix generation executable
 matrix:
-	gcc matrixgen.c -o matrixgen
+	${CC} matrixgen.c -o matrixgen
 
-# Generate serial tester executable
 serial:
-	gcc serialtester.c lab1_IO.c -o serialtester
+	${CC} serialtester.c lab1_IO.c -o serialtester
+
+# Zip files for submission
+submission:
+	cd ..; zip -r 1535268.zip Code/ Members/
 
 # Remove all intermediate files
 clean:
 	rm -rf *.o
-
-# Compress for submission
-# compress:
-# 	zip assignment2.zip Makefile README.md client.h client.cpp server.h server.cpp helpers.h helpers.cpp tands.c
