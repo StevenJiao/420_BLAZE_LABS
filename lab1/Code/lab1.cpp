@@ -2,6 +2,7 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <math.h>
+#include <iostream>
 
 extern "C" {
     #include "lab1_IO.h"
@@ -20,8 +21,10 @@ void* threadfunc(void* arg_p){
     int x = floor(rank/(int)sqrt(thread_cnt));
     int y = rank % (int)sqrt(thread_cnt);
 
+    // calculate the factor
     int factor = (n/sqrt(thread_cnt));
 
+    // have the thread calcuate C[i][j] in its own given square
     for (int i = factor*x; i <= factor*(x+1)-1; i++) {
         for (int j = factor*y; j <= factor*(y+1)-1; j++) {
             C[i][j] = 0;
@@ -31,7 +34,9 @@ void* threadfunc(void* arg_p){
         }
     }
 
+    // free our heap rank
     free(arg_p);
+
     return nullptr;
 }
 
@@ -79,6 +84,7 @@ int main(int argc, char *argv[]) {
 
     // Get the thread count from cmd, initialize threads and return vars
     if (argc < 2)
+        std::cout << "call ./main with a value for the maximum number of threads. Exiting." << std::endl;
         return 0;
     thread_cnt = largest_factor(strtol(argv[1], nullptr, 0));
 
@@ -90,6 +96,7 @@ int main(int argc, char *argv[]) {
 
     // Create each thread, and wait on their return values
     for (int i=0; i<thread_cnt; i++) {
+        // store the rank on the heap so threads can access
         int *arg = (int *) malloc(sizeof(*arg));
         *arg = i;
         pthread_create(&threads[i], NULL, threadfunc, (void *) arg);
