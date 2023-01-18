@@ -83,9 +83,11 @@ int main(int argc, char *argv[]) {
     }
 
     // Get the thread count from cmd, initialize threads and return vars
-    if (argc < 2)
+    if (argc < 2) {
         std::cout << "call ./main with a value for the maximum number of threads. Exiting." << std::endl;
         return 0;
+    }
+
     thread_cnt = largest_factor(strtol(argv[1], nullptr, 0));
 
     pthread_t threads[thread_cnt];
