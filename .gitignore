@@ -30,3 +30,8 @@
 *.exe
 *.out
 *.app
+
+data_output
+lab1/Code/matrixgen
+lab1/Code/serialtester
+lab1/Code/main

@@ -3,10 +3,11 @@ CXX = g++
 CFLAGS = -Wall -c
 CXXFLAGS = -Wall
 LAB1_OBJECTS = lab1.o lab1_IO.o
+EXECUTABLE = main
 
 # Link and create executable
 lab1: ${LAB1_OBJECTS}
-	$(CXX) $(LAB1_OBJECTS) -o main -lpthread
+	$(CXX) $(LAB1_OBJECTS) -o $(EXECUTABLE) -lpthread
 
 # Create object (.o) files
 lab1.o: lab1.cpp
@@ -30,4 +31,4 @@ submission:
 
 # Remove all intermediate files
 clean:
-	rm -rf *.o
+	rm -rf *.o $(EXECUTABLE)

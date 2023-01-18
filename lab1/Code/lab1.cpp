@@ -9,25 +9,30 @@ extern "C" {
 #include "timer.h"
 
 int **A; int**B; int** C; int n;
+int thread_cnt;
 
 double start, end;
 
-void* threadfunc (void* arg_p){
-    int i = ((int*) arg_p)[0];
-    int thread_cnt = ((int*) arg_p)[1];
+void* threadfunc(void* arg_p){
+    int rank = *((int *) arg_p);
 
     // calculate the row (x) and col (y) for the thread to work on in the matrix
-    int x = floor(i/(int)sqrt(thread_cnt));
-    int y = i % (int)sqrt(thread_cnt);
+    int x = floor(rank/(int)sqrt(thread_cnt));
+    int y = rank % (int)sqrt(thread_cnt);
 
     int factor = (n/sqrt(thread_cnt));
+
     for (int i = factor*x; i <= factor*(x+1)-1; i++) {
-        for (int j = factor*y; j <= factor*(j+1)-1; j++) {
+        for (int j = factor*y; j <= factor*(y+1)-1; j++) {
             C[i][j] = 0;
-            for (int k = factor*x; k <= factor*(j+1)-1; k++)
+            for (int k = 0; k < n; k++) {
                 C[i][j] += A[i][k] * B[k][j];
+            }
         }
     }
+
+    free(arg_p);
+    return nullptr;
 }
 
 int largest_factor(int p) {
@@ -48,7 +53,7 @@ int largest_factor(int p) {
     return 1;
 }
 
-int main(int argc , char *argv[]) {
+int main(int argc, char *argv[]) {
 
     /*
     Spawn a set of pthreads to operate on a set of matrix cells
@@ -67,25 +72,32 @@ int main(int argc , char *argv[]) {
     // Get matrix data
     Lab1_loadinput(&A, &B, &n);
 
+    C = (int**) malloc(n * sizeof(int*));
+    for (int i = 0; i < n; i++) {
+        C[i] = (int*) malloc(n * sizeof(int));
+    }
+
     // Get the thread count from cmd, initialize threads and return vars
-    int thread_cnt = largest_factor(strtol(argv[1], nullptr, 0));
+    if (argc < 2)
+        return 0;
+    thread_cnt = largest_factor(strtol(argv[1], nullptr, 0));
 
     pthread_t threads[thread_cnt];
-    void** return_val;
+    void* return_val;
 
     // Start timing
     GET_TIME(start);
 
     // Create each thread, and wait on their return values
     for (int i=0; i<thread_cnt; i++) {
-        int input[2] = {i, thread_cnt};
-
-        pthread_create(&threads[i], NULL, threadfunc, (void*) input);
+        int *arg = (int *) malloc(sizeof(*arg));
+        *arg = i;
+        pthread_create(&threads[i], NULL, threadfunc, (void *) arg);
     }
 
     // Join each thread, get output in return_val
     for (int i = 0; i < thread_cnt; i++) {
-        pthread_join(threads[i], return_val);
+        pthread_join(threads[i], &return_val);
     }
 
     // End timing
@@ -93,6 +105,10 @@ int main(int argc , char *argv[]) {
 
     // Output result
     Lab1_saveoutput(C, &n, end-start);
+
+    free(A);
+    free(B);
+    free(C);
 
     return 0;
 }
