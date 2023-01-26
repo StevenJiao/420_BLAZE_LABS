@@ -86,4 +86,12 @@ void saveTimes(double* time, int length){
     fclose(op);
 }
 
+void initializeArray(char ***theArray) {
+    /* Create the memory and fill in the initial values for theArray */
+    *theArray = (char**) malloc(MAX_ARR_LEN * sizeof(char*));
+    for (int i = 0; i < MAX_ARR_LEN; i ++){
+        *theArray[i] = (char*) malloc(COM_BUFF_SIZE * sizeof(char));
+    }
+}
+
 #endif
