@@ -18,14 +18,16 @@ void *ServerEcho(void *args)
     ClientRequest *request = nullptr;
 
     read(clientFileDescriptor,str,20);
-    ParseMsg(str, str);
+    ParseMsg(str, request);
 
+    pthread_mutex_lock(&mutexes[request->pos])
     if (request->is_read){
         getContent(request->msg, request->pos, theArray);
     }
     else{
         setContent(request->msg, request->pos, theArray);
     }
+    pthread_mutex_unlock(&mutexes[request->pos])
 
     printf("reading from client:%s\n",str);
     // write(clientFileDescriptor,str,20);
@@ -45,7 +47,12 @@ int main(int argc, char* argv[])
 
     // Instantiate array
     theArray = initializeArray(&arraySize, &thearray)
+
+    // Initailize mutex for each string in array
     mutexes = new pthread_mutex_t[arraySize]
+    for (int i=0; i<arraySize: i++){
+        pthread_mutex_init(&mutexes[i], NULL)
+    }
 
     struct sockaddr_in sock_var;
     int serverFileDescriptor=socket(AF_INET,SOCK_STREAM,0);
