@@ -40,16 +40,13 @@ int main(int argc, char* argv[])
         printf("Error: 3 command line arguments are required.\n"); 
         return 1;
     }
-    printf("attempting to get command line arguments\n");
     int ARR_LEN = atoi(argv[1]);
     char *IP = argv[2];
     const int PORT = atoi(argv[3]);
 
-    printf("Initializing array\n");
     // initialize an array
     initializeArray(&ARR_LEN, &theArray);
 
-    printf("connecting to server socket\n");
     // connect the server
     struct sockaddr_in sock_var;
     int serverFileDescriptor=socket(AF_INET,SOCK_STREAM,0);
@@ -57,7 +54,6 @@ int main(int argc, char* argv[])
     int i;
     pthread_t t[COM_NUM_REQUEST];
 
-    printf("atempting to bind\n");
     sock_var.sin_addr.s_addr=inet_addr(IP);
     sock_var.sin_port=PORT;
     sock_var.sin_family=AF_INET;
