@@ -2,9 +2,21 @@ CC = gcc
 CXX = g++
 CFLAGS = -Wall -c
 CXXFLAGS = -Wall -std=gnu++0x
-LAB1_OBJECTS = 
-EXECUTABLE = main
 
+main: main1 # main2 main3 main4
+
+# Link and create executable
+main1: main1.o
+	$(CXX) main1.o -o main
+
+main1.o: main1.cpp
+	$(CXX) $(CXXFLAGS) -c main1.cpp -o main1.o
+
+attacker:
+	${CC} attacker.c -o attacker
+
+client:
+	${CC} client.c -o client
 
 # Zip files for submission
 submission:
