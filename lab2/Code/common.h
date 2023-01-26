@@ -12,6 +12,7 @@
 #define COM_BUFF_SIZE 100 // communication buffer size, which is the maximum size of the transmitted string
 #define COM_CLIENT_THREAD_COUNT 100 // Number of threads in client, COM_NUM_REQUEST should be divisible by this Number
 #define ART_DELAY 10 // artificial delay, in microseconds, for all R/W process
+#define MAX_ARR_LEN 1000 // change this to specify different lengs for the string array each server holds.
 //-------------------------------------
 // Server utilities
 
