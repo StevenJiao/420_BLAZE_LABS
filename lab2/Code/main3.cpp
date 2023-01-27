@@ -17,25 +17,27 @@ void *ServerEcho(void *args)
     int clientFileDescriptor = *((int*)args);
     char msg[COM_BUFF_SIZE];
     ClientRequest *req = new ClientRequest;
+
     // read and parse the message
-    printf("Attempting to read message\n");
     read(clientFileDescriptor, msg, COM_BUFF_SIZE);
-    printf("Message read: %s\n", msg);
     if (ParseMsg(msg, req) == 1) {
         printf("Could not parse client message.\n");
         return nullptr;
     }
 
+    // if the request is read
     if (req->is_read) {
+        // protect the critical section and read
         pthread_rwlock_rdlock(&rwlock);
         getContent(req->msg, req->pos, theArray);
-        pthread_rwlock_unlock(&rwlock);
     }
     else {
+        // protect the critical section and write
         pthread_rwlock_wrlock(&rwlock);
         setContent(req->msg, req->pos, theArray);
-        pthread_rwlock_unlock(&rwlock);
     }
+    write(clientFileDescriptor, req->msg, COM_BUFF_SIZE);
+    pthread_rwlock_unlock(&rwlock);
 
     // finish by closing the descriptor, freeing the arg and deleting the ClientRequest
     close(clientFileDescriptor);
@@ -82,7 +84,7 @@ int main(int argc, char* argv[])
             for(i=0;i<COM_NUM_REQUEST;i++)
             {
                 clientFileDescriptor = accept(serverFileDescriptor,NULL,NULL);
-                printf("Connected to client %d\n", clientFileDescriptor);
+                // printf("Connected to client %d\n", clientFileDescriptor);
                 int *arg = (int *) malloc(sizeof(*arg));
                 *arg = clientFileDescriptor;
                 pthread_create(&t[i], NULL, ServerEcho, (void*)arg);
