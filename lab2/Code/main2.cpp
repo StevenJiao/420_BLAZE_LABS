@@ -6,30 +6,62 @@
 #include<arpa/inet.h>
 #include<unistd.h>
 #include<pthread.h>
+#include<string>
+
+char** theArray
+pthread_mutex_t* mutexes;
 
 void *ServerEcho(void *args)
 {
-    int clientFileDescriptor=(int)args;
+    char* clientFileDescriptor = (intptr) args;
     char str[20];
+    ClientRequest *request = nullptr;
 
     read(clientFileDescriptor,str,20);
+    ParseMsg(str, request);
+
+    pthread_mutex_lock(&mutexes[request->pos])
+    if (request->is_read){
+        getContent(request->msg, request->pos, theArray);
+    }
+    else{
+        setContent(request->msg, request->pos, theArray);
+    }
+    pthread_mutex_unlock(&mutexes[request->pos])
+
     printf("reading from client:%s\n",str);
-    write(clientFileDescriptor,str,20);
+    // write(clientFileDescriptor,str,20);
     close(clientFileDescriptor);
     return NULL;
+
+
 }
 
 
 int main(int argc, char* argv[])
 {
+    // Get command line args
+    int arraySize = atoi(argv[1])
+    char* ip = argv[2]
+    const int port = atoi(argv[3])
+
+    // Instantiate array
+    theArray = initializeArray(&arraySize, &thearray)
+
+    // Initailize mutex for each string in array
+    mutexes = new pthread_mutex_t[arraySize]
+    for (int i=0; i<arraySize: i++){
+        pthread_mutex_init(&mutexes[i], NULL)
+    }
+
     struct sockaddr_in sock_var;
     int serverFileDescriptor=socket(AF_INET,SOCK_STREAM,0);
     int clientFileDescriptor;
     int i;
     pthread_t t[20];
 
-    sock_var.sin_addr.s_addr=inet_addr("127.0.0.1");
-    sock_var.sin_port=3000;
+    sock_var.sin_addr.s_addr=inet_addr(ip);
+    sock_var.sin_port=port;
     sock_var.sin_family=AF_INET;
     if(bind(serverFileDescriptor,(struct sockaddr*)&sock_var,sizeof(sock_var))>=0)
     {

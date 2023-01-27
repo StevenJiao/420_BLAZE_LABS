@@ -3,6 +3,7 @@ CXX = g++
 CFLAGS = -Wall -c
 CXXFLAGS = -Wall -std=gnu++0x
 LAB1_OBJECTS = lab1.o lab1_IO.o
+LAB_NUM = 1
 EXECUTABLE = main
 
 # Link and create executable
@@ -31,7 +32,7 @@ submission:
 
 # Send files to lab machine for testing
 teleport: submission
-	cd ..; scp -P9007 -r 1535268.zip user_07@129.128.215.200:labs/
+	cd ..; scp -P9007 -r 1535268.zip Code/ Members/ user_07@129.128.215.200:labs/lab$(LAB_NUM)
 
 # Remove all intermediate files
 clean:

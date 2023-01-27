@@ -9,26 +9,44 @@
 #include"common.h"
 
 char **theArray;
+pthread_rwlock_t rwlock;
+
 
 void *ServerEcho(void *args)
 {
-    int clientFileDescriptor = (intptr_t)args;
+    int clientFileDescriptor = *((int*)args);
     char msg[COM_BUFF_SIZE];
-    ClientRequest *req = nullptr;
+    ClientRequest *req = new ClientRequest;
 
     // read and parse the message
-    read(clientFileDescriptor,msg,COM_BUFF_SIZE);
-    ParseMsg(msg, req);
+    read(clientFileDescriptor, msg, COM_BUFF_SIZE);
+    if (ParseMsg(msg, req) == 1) {
+        printf("Could not parse client message.\n");
+        return nullptr;
+    }
 
-    if (req->is_read) {
-        getContent(req->msg, req->pos, theArray);
-    }
-    else {
+    // if the request is write
+    if (!req->is_read) {
+        // protect the critical section and write
+        pthread_rwlock_wrlock(&rwlock);
         setContent(req->msg, req->pos, theArray);
+        pthread_rwlock_unlock(&rwlock);
     }
-    // printf("reading from client:%s\n",msg);
-    // write(clientFileDescriptor, msg, COM_BUFF_SIZE);
+
+    // get the message from the position
+    pthread_rwlock_rdlock(&rwlock);
+    getContent(req->msg, req->pos, theArray);
+    pthread_rwlock_unlock(&rwlock);
+
+    // write it back to client
+    write(clientFileDescriptor, req->msg, COM_BUFF_SIZE);
+
+    // finish by closing the descriptor, freeing the arg and deleting the ClientRequest
     close(clientFileDescriptor);
+    free(args);
+    delete req;
+
+    pthread_exit(NULL);
     return NULL;
 }
 
@@ -47,6 +65,9 @@ int main(int argc, char* argv[])
     // initialize an array
     initializeArray(&ARR_LEN, &theArray);
 
+    // initialize our rw lock
+    pthread_rwlock_init(&rwlock, NULL);
+
     // connect the server
     struct sockaddr_in sock_var;
     int serverFileDescriptor=socket(AF_INET,SOCK_STREAM,0);
@@ -60,14 +81,19 @@ int main(int argc, char* argv[])
     if(bind(serverFileDescriptor,(struct sockaddr*)&sock_var,sizeof(sock_var))>=0)
     {
         printf("socket has been created\n");
-        listen(serverFileDescriptor,2000); 
+        listen(serverFileDescriptor, COM_NUM_REQUEST); 
         while(1)        //loop infinity
         {
             for(i=0;i<COM_NUM_REQUEST;i++)
             {
-                clientFileDescriptor=accept(serverFileDescriptor,NULL,NULL);
-                printf("Connected to client %d\n",clientFileDescriptor);
-                pthread_create(&t[i],NULL,ServerEcho,(void *)(long)clientFileDescriptor);
+                clientFileDescriptor = accept(serverFileDescriptor,NULL,NULL);
+                // printf("Connected to client %d\n", clientFileDescriptor);
+                int *arg = (int *) malloc(sizeof(*arg));
+                *arg = clientFileDescriptor;
+                pthread_create(&t[i], NULL, ServerEcho, (void*)arg);
+            }
+            for (i=0;i<COM_NUM_REQUEST;i++){
+                pthread_join(t[i],NULL);
             }
         }
         close(serverFileDescriptor);

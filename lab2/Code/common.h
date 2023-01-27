@@ -90,7 +90,7 @@ void initializeArray(int *arrayLen, char ***theArray) {
     *theArray = (char**) malloc(*arrayLen * sizeof(char*));
     for (int i = 0; i < *arrayLen; i++){
         (*theArray)[i] = (char*) malloc(COM_BUFF_SIZE * sizeof(char));
-        sprintf((*theArray)[i], "theArray[%d]: initial value", i);
+        snprintf((*theArray)[i], COM_BUFF_SIZE, "theArray[%d]: initial value", i);
     }
 }
 
