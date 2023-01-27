@@ -65,7 +65,6 @@ int main(int argc, char* argv[])
     // Instantiate socket
     struct sockaddr_in sock_var;
     int serverFileDescriptor=socket(AF_INET,SOCK_STREAM,0);
-    // int clientFileDescriptor;
     int i;
     pthread_t t[20];
 
@@ -79,19 +78,24 @@ int main(int argc, char* argv[])
     initializeArray(&arr_len, &arr);
 
     // Init mutex
-    pthread_mutex_init(&lock, NULL);  // TODO: Handle return code
+    if (pthread_mutex_init(&lock, NULL) != 0) {
+        printf("Mutex creation failed\n");
+        return 1;
+    }
 
     if(bind(serverFileDescriptor,(struct sockaddr*)&sock_var,sizeof(sock_var))>=0) {
         printf("socket has been created\n");
         listen(serverFileDescriptor,2000); 
         while(1) {
-            // Open 1000 threads
+            // Spawn a thread for every new socket connection
             for(i=0;i<COM_NUM_REQUEST;i++) {
                 client_fds[i] = accept(serverFileDescriptor,NULL,NULL);
                 printf("Connected to client %d\n",client_fds[i]);
                 pthread_create(&t[i],NULL,ServerEcho,(void *)(long)client_fds[i]);
             }
         }
+
+        // Cleanup
         close(serverFileDescriptor);
         pthread_mutex_destroy(&lock);
     }
