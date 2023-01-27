@@ -6,8 +6,8 @@ EXECUTABLE = main1 main2 main3 main4
 main: main1 # main2 main3 main4
 
 # Link and create executable
-main1: main1.o
-	$(CXX) main1.o -o main1
+main1: main1.o common.h
+	$(CXX) main1.o -o main1 -lpthread
 
 main1.o: main1.cpp
 	$(CXX) $(CXXFLAGS) -c main1.cpp -o main1.o
@@ -21,7 +21,7 @@ main3.o: main3.cpp
 attacker:
 	${CC} attacker.c -o attacker
 
-client:
+client: client.c common.h
 	${CC} client.c -o client
 
 # Zip files for submission

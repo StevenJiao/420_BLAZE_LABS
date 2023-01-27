@@ -7,17 +7,48 @@
 #include<unistd.h>
 #include<pthread.h>
 
+// For intptr_t cast
 #include <cstdint>
 #include <stdint.h>
 
+// For atoi
+#include <cstdlib>
+
+#include "common.h"
+
+char** arr;
+pthread_mutex_t lock;
+int client_fds[COM_NUM_REQUEST];
+
 void *ServerEcho(void *args)
 {
-    int clientFileDescriptor = (intptr_t) args;
-    char str[20];
+    intptr_t clientFileDescriptor = (intptr_t) args;
 
-    read(clientFileDescriptor,str,20);
-    printf("reading from client:%s\n",str);
-    write(clientFileDescriptor,str,20);
+    // Allocate and read the max buffer size
+    char str[COM_BUFF_SIZE];
+    char req_str[COM_BUFF_SIZE];
+    read(clientFileDescriptor, str, COM_BUFF_SIZE);
+
+    // Parse the request
+    ClientRequest* request = new ClientRequest;
+    ParseMsg(str, request);
+    printf("Received: is_read: %d, pos: %d msg: %s\n", (*request).is_read, (*request).pos, (*request).msg);
+
+    // Write if request said to, and always read after
+    if (!(*request).is_read) {
+        // Lock array mutex for write
+        pthread_mutex_lock(&lock);
+        setContent((*request).msg, (*request).pos, arr);
+        pthread_mutex_unlock(&lock);
+    }
+    
+    // Lock array mutex for read
+    pthread_mutex_lock(&lock);
+    getContent(req_str, (*request).pos, arr);
+    pthread_mutex_unlock(&lock);
+
+    // Respond with value we read
+    write(clientFileDescriptor, req_str, COM_BUFF_SIZE);
     close(clientFileDescriptor);
     return NULL;
 }
@@ -25,32 +56,48 @@ void *ServerEcho(void *args)
 
 int main(int argc, char* argv[])
 {
+
+    // Get argument values
+    int arr_len = atoi(argv[1]);
+    char* server_ip = argv[2];
+    int server_port = atoi(argv[3]);
+
+    // Instantiate socket
     struct sockaddr_in sock_var;
     int serverFileDescriptor=socket(AF_INET,SOCK_STREAM,0);
-    int clientFileDescriptor;
+    // int clientFileDescriptor;
     int i;
     pthread_t t[20];
 
-    sock_var.sin_addr.s_addr=inet_addr("127.0.0.1");
-    sock_var.sin_port=3000;
+    // Configure socket
+    sock_var.sin_addr.s_addr = inet_addr(server_ip);
+    sock_var.sin_port = server_port;
     sock_var.sin_family=AF_INET;
-    if(bind(serverFileDescriptor,(struct sockaddr*)&sock_var,sizeof(sock_var))>=0)
-    {
+
+    // Init array
+    printf("Array length: %d, IP: %s, Port: %d\n", arr_len, server_ip, server_port);
+    initializeArray(&arr_len, &arr);
+
+    // Init mutex
+    pthread_mutex_init(&lock, NULL);  // TODO: Handle return code
+
+    if(bind(serverFileDescriptor,(struct sockaddr*)&sock_var,sizeof(sock_var))>=0) {
         printf("socket has been created\n");
         listen(serverFileDescriptor,2000); 
-        while(1)        //loop infinity
-        {
-            for(i=0;i<20;i++)      //can support 20 clients at a time
-            {
-                clientFileDescriptor=accept(serverFileDescriptor,NULL,NULL);
-                printf("Connected to client %d\n",clientFileDescriptor);
-                pthread_create(&t[i],NULL,ServerEcho,(void *)(long)clientFileDescriptor);
+        while(1) {
+            // Open 1000 threads
+            for(i=0;i<COM_NUM_REQUEST;i++) {
+                client_fds[i] = accept(serverFileDescriptor,NULL,NULL);
+                printf("Connected to client %d\n",client_fds[i]);
+                pthread_create(&t[i],NULL,ServerEcho,(void *)(long)client_fds[i]);
             }
         }
         close(serverFileDescriptor);
+        pthread_mutex_destroy(&lock);
     }
     else{
         printf("socket creation failed\n");
     }
+
     return 0;
 }
