@@ -20,7 +20,7 @@ char** arr;
 pthread_mutex_t lock;
 int client_fds[COM_NUM_REQUEST];
 
-void *ServerEcho(void *args)
+void *ServerThread(void *args)
 {
     intptr_t clientFileDescriptor = (intptr_t) args;
 
@@ -50,6 +50,10 @@ void *ServerEcho(void *args)
     // Respond with value we read
     write(clientFileDescriptor, req_str, COM_BUFF_SIZE);
     close(clientFileDescriptor);
+
+    // Cleanup
+    delete request;
+    pthread_exit(NULL);
     return NULL;
 }
 
@@ -66,7 +70,7 @@ int main(int argc, char* argv[])
     struct sockaddr_in sock_var;
     int serverFileDescriptor=socket(AF_INET,SOCK_STREAM,0);
     int i;
-    pthread_t t[20];
+    pthread_t t[COM_NUM_REQUEST];
 
     // Configure socket
     sock_var.sin_addr.s_addr = inet_addr(server_ip);
@@ -91,7 +95,11 @@ int main(int argc, char* argv[])
             for(i=0;i<COM_NUM_REQUEST;i++) {
                 client_fds[i] = accept(serverFileDescriptor,NULL,NULL);
                 printf("Connected to client %d\n",client_fds[i]);
-                pthread_create(&t[i],NULL,ServerEcho,(void *)(long)client_fds[i]);
+                pthread_create(&t[i],NULL,ServerThread,(void *)(long)client_fds[i]);
+            }
+
+            for (i=0;i<COM_NUM_REQUEST;i++){
+                pthread_join(t[i],NULL);
             }
         }
 
