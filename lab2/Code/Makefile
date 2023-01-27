@@ -34,7 +34,7 @@ main4.o: main4.cpp
 	$(CXX) $(CXXFLAGS) -c main4.cpp -o main4.o
 
 attacker:
-	${C99} attacker.c -o attacker -lpthread
+	${CC} attacker.c -o attacker -lpthread -lm
 
 client:
 	${C99} client.c -o client -lpthread
