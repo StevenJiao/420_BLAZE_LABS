@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
     if(bind(serverFileDescriptor,(struct sockaddr*)&sock_var,sizeof(sock_var))>=0)
     {
         printf("socket has been created\n");
-        listen(serverFileDescriptor,2000); 
+        listen(serverFileDescriptor, COM_NUM_REQUEST); 
         while(1)        //loop infinity
         {
             for(i=0;i<COM_NUM_REQUEST;i++)
