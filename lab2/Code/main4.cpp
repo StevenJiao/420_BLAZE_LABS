@@ -101,6 +101,9 @@ int main(int argc, char* argv[])
                 arg[1] = i;
                 pthread_create(&t[i], NULL, ServerEcho, (void*)arg);
             }
+            for (i=0;i<COM_NUM_REQUEST;i++){
+                pthread_join(t[i],NULL);
+            }
         }
         close(serverFileDescriptor);
     }
