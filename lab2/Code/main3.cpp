@@ -25,25 +25,28 @@ void *ServerEcho(void *args)
         return nullptr;
     }
 
-    // if the request is read
-    if (req->is_read) {
-        // protect the critical section and read
-        pthread_rwlock_rdlock(&rwlock);
-        getContent(req->msg, req->pos, theArray);
-    }
-    else {
+    // if the request is write
+    if (!req->is_read) {
         // protect the critical section and write
         pthread_rwlock_wrlock(&rwlock);
         setContent(req->msg, req->pos, theArray);
+        pthread_rwlock_unlock(&rwlock);
     }
-    write(clientFileDescriptor, req->msg, COM_BUFF_SIZE);
+
+    // get the message from the position
+    pthread_rwlock_rdlock(&rwlock);
+    getContent(req->msg, req->pos, theArray);
     pthread_rwlock_unlock(&rwlock);
+
+    // write it back to client
+    write(clientFileDescriptor, req->msg, COM_BUFF_SIZE);
 
     // finish by closing the descriptor, freeing the arg and deleting the ClientRequest
     close(clientFileDescriptor);
     free(args);
     delete req;
 
+    pthread_exit(NULL);
     return NULL;
 }
 
