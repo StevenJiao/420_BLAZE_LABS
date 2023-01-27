@@ -9,26 +9,39 @@
 #include"common.h"
 
 char **theArray;
+pthread_rwlock_t rwlock;
+
 
 void *ServerEcho(void *args)
 {
-    int clientFileDescriptor = (intptr_t)args;
+    int clientFileDescriptor = *((int*)args);
     char msg[COM_BUFF_SIZE];
-    ClientRequest *req = nullptr;
-
+    ClientRequest *req = new ClientRequest;
     // read and parse the message
-    read(clientFileDescriptor,msg,COM_BUFF_SIZE);
-    ParseMsg(msg, req);
+    printf("Attempting to read message\n");
+    read(clientFileDescriptor, msg, COM_BUFF_SIZE);
+    printf("Message read: %s\n", msg);
+    if (ParseMsg(msg, req) == 1) {
+        printf("Could not parse client message.\n");
+        return nullptr;
+    }
 
     if (req->is_read) {
+        pthread_rwlock_rdlock(&rwlock);
         getContent(req->msg, req->pos, theArray);
+        pthread_rwlock_unlock(&rwlock);
     }
     else {
+        pthread_rwlock_wrlock(&rwlock);
         setContent(req->msg, req->pos, theArray);
+        pthread_rwlock_unlock(&rwlock);
     }
-    // printf("reading from client:%s\n",msg);
-    // write(clientFileDescriptor, msg, COM_BUFF_SIZE);
+
+    // finish by closing the descriptor, freeing the arg and deleting the ClientRequest
     close(clientFileDescriptor);
+    free(args);
+    delete req;
+
     return NULL;
 }
 
@@ -46,6 +59,9 @@ int main(int argc, char* argv[])
 
     // initialize an array
     initializeArray(&ARR_LEN, &theArray);
+
+    // initialize our rw lock
+    pthread_rwlock_init(&rwlock, NULL);
 
     // connect the server
     struct sockaddr_in sock_var;
@@ -65,9 +81,11 @@ int main(int argc, char* argv[])
         {
             for(i=0;i<COM_NUM_REQUEST;i++)
             {
-                clientFileDescriptor=accept(serverFileDescriptor,NULL,NULL);
-                printf("Connected to client %d\n",clientFileDescriptor);
-                pthread_create(&t[i],NULL,ServerEcho,(void *)(long)clientFileDescriptor);
+                clientFileDescriptor = accept(serverFileDescriptor,NULL,NULL);
+                printf("Connected to client %d\n", clientFileDescriptor);
+                int *arg = (int *) malloc(sizeof(*arg));
+                *arg = clientFileDescriptor;
+                pthread_create(&t[i], NULL, ServerEcho, (void*)arg);
             }
         }
         close(serverFileDescriptor);
