@@ -4,6 +4,7 @@ CFLAGS = -Wall -c
 CXXFLAGS = -Wall -std=gnu++0x
 MAIN_EXECUTABLE = main1 main2 main3 main4
 OTHER_EXECUTABLE = attacker client
+LAB_NUM = 2
 main: main1 main3 main4 #main2
 
 # Link and create executable
@@ -43,7 +44,7 @@ submission:
 
 # Send files to lab machine for testing
 teleport: submission
-	cd ..; scp -P9007 -r 1535268.zip user_07@129.128.215.200:labs/
+	cd ..; scp -P9007 -r 1535268.zip user_07@129.128.215.200:labs/lab$(LAB_NUM)
 
 # Remove all intermediate files
 clean:
