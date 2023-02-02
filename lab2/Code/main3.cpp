@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
                 pthread_join(t[i],NULL);
             }
             saveTimes(times, COM_NUM_REQUEST);
-            delete times;
+            delete[] times;
             times = new double[COM_NUM_REQUEST];
 
         }
