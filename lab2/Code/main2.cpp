@@ -15,6 +15,7 @@
 
 char **theArray;
 pthread_mutex_t *locks;
+double* times = new double[COM_NUM_REQUEST];
 
 
 void *ServerEcho(void *args)
@@ -104,6 +105,9 @@ int main(int argc, char* argv[])
             for (i=0;i<COM_NUM_REQUEST;i++){
                 pthread_join(t[i],NULL);
             }
+            saveTimes(times, COM_NUM_REQUEST, "main3_output_time_aggregated");
+            delete[] times;
+            times = new double[COM_NUM_REQUEST];
         }
         close(serverFileDescriptor);
     }
