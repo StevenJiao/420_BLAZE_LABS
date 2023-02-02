@@ -7,16 +7,22 @@
 #include<unistd.h>
 #include<pthread.h>
 #include"common.h"
+#include"timer.h"
 
 char **theArray;
 pthread_rwlock_t rwlock;
+// for timers
+double* times = new double[COM_NUM_REQUEST];
 
 
 void *ServerEcho(void *args)
 {
-    int clientFileDescriptor = *((int*)args);
+    int *arrArgs = (int*) args;
+    int rank = arrArgs[1];
+    int clientFileDescriptor = arrArgs[0];
     char msg[COM_BUFF_SIZE];
     ClientRequest *req = new ClientRequest;
+    double start; double end;
 
     // read and parse the message
     read(clientFileDescriptor, msg, COM_BUFF_SIZE);
@@ -24,6 +30,9 @@ void *ServerEcho(void *args)
         printf("Could not parse client message.\n");
         return nullptr;
     }
+
+    // start timer
+    GET_TIME(start);
 
     // if the request is write
     if (!req->is_read) {
@@ -37,6 +46,10 @@ void *ServerEcho(void *args)
     pthread_rwlock_rdlock(&rwlock);
     getContent(req->msg, req->pos, theArray);
     pthread_rwlock_unlock(&rwlock);
+
+    GET_TIME(end);
+
+    times[rank] = end-start;
 
     // write it back to client
     write(clientFileDescriptor, req->msg, COM_BUFF_SIZE);
@@ -88,13 +101,18 @@ int main(int argc, char* argv[])
             {
                 clientFileDescriptor = accept(serverFileDescriptor,NULL,NULL);
                 // printf("Connected to client %d\n", clientFileDescriptor);
-                int *arg = (int *) malloc(sizeof(*arg));
-                *arg = clientFileDescriptor;
+                int *arg = new int[2];
+                arg[0] = clientFileDescriptor;
+                arg[1] = i;
                 pthread_create(&t[i], NULL, ServerEcho, (void*)arg);
             }
             for (i=0;i<COM_NUM_REQUEST;i++){
                 pthread_join(t[i],NULL);
             }
+            saveTimes(times, COM_NUM_REQUEST);
+            delete times;
+            times = new double[COM_NUM_REQUEST];
+
         }
         close(serverFileDescriptor);
     }
