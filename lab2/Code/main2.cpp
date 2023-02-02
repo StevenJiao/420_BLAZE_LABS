@@ -19,6 +19,7 @@ pthread_mutex_t *locks;
 
 void *ServerEcho(void *args)
 {
+
     int clientFileDescriptor = *((int*)args);
     char str[COM_BUFF_SIZE];
     ClientRequest *request = new ClientRequest;
@@ -93,7 +94,10 @@ int main(int argc, char* argv[])
             {
                 clientFileDescriptor=accept(serverFileDescriptor,NULL,NULL);
                 // printf("Connected to client %d\n",clientFileDescriptor);
-                pthread_create(&t[i],NULL,ServerEcho,(void *)(long)clientFileDescriptor);
+
+                int *arg = (int *) malloc(sizeof(*arg));
+                *arg = clientFileDescriptor;
+                pthread_create(&t[i], NULL, ServerEcho, (void*)arg);
             }
 
             // Wait for the threads to terminate
