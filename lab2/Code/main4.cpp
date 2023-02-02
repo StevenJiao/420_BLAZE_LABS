@@ -7,9 +7,12 @@
 #include<unistd.h>
 #include<pthread.h>
 #include"common.h"
+#include"timer.h"
 
 char **theArray;
 pthread_rwlock_t *rwlock;
+// for timers
+double* times = new double[COM_NUM_REQUEST];
 
 
 void *ServerEcho(void *args)
@@ -19,6 +22,7 @@ void *ServerEcho(void *args)
     int clientFileDescriptor = arrArgs[0];
     char msg[COM_BUFF_SIZE];
     ClientRequest *req = new ClientRequest;
+    double start; double end;
 
     // read and parse the message
     read(clientFileDescriptor, msg, COM_BUFF_SIZE);
@@ -26,6 +30,9 @@ void *ServerEcho(void *args)
         printf("Could not parse client message.\n");
         return nullptr;
     }
+
+    // start timer
+    GET_TIME(start);
 
     // if the request is write
     if (!req->is_read) {
@@ -39,6 +46,9 @@ void *ServerEcho(void *args)
     pthread_rwlock_rdlock(&rwlock[rank]);
     getContent(req->msg, req->pos, theArray);
     pthread_rwlock_unlock(&rwlock[rank]);
+
+    GET_TIME(end);
+    times[rank] = end-start;
 
     // write it back to client
     write(clientFileDescriptor, req->msg, COM_BUFF_SIZE);
@@ -104,6 +114,9 @@ int main(int argc, char* argv[])
             for (i=0;i<COM_NUM_REQUEST;i++){
                 pthread_join(t[i],NULL);
             }
+            saveTimes(times, COM_NUM_REQUEST, "main4_output_time_aggregated");
+            delete[] times;
+            times = new double[COM_NUM_REQUEST];
         }
         close(serverFileDescriptor);
     }
