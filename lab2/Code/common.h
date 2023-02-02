@@ -69,7 +69,8 @@ void getContent(char* dst, int pos, char **theArray){
 // Function to save the measured time
 // Input: time: pointer to the array that store the time for each request
 //        length: length of the time
-void saveTimes(double* time, int length){
+void saveTimes(double* time, int length, char* filename = NULL){
+    if (filename == NULL) filename = "server_output_time_aggregated";
     FILE* op;
     int i;
     double elapsed_time = 0;
@@ -77,7 +78,7 @@ void saveTimes(double* time, int length){
         elapsed_time += time[i];
     }
     elapsed_time /= length;
-    if ((op = fopen("server_output_time_aggregated","a+")) == NULL){
+    if ((op = fopen(filename,"a+")) == NULL){
         printf("Error opening the output file: server_output_time_aggregated.\n");
         exit(1);
     }
