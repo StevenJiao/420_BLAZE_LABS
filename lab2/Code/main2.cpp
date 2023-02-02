@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
             for (i=0;i<COM_NUM_REQUEST;i++){
                 pthread_join(t[i],NULL);
             }
-            saveTimes(times, COM_NUM_REQUEST, "main3_output_time_aggregated");
+            saveTimes(times, COM_NUM_REQUEST, "main2_output_time_aggregated");
             delete[] times;
             times = new double[COM_NUM_REQUEST];
         }
