@@ -6,7 +6,7 @@ CXXFLAGS = -Wall -std=gnu++0x
 MAIN_EXECUTABLE = main1 main2 main3 main4
 OTHER_EXECUTABLE = attacker client
 LAB_NUM = 2
-main: main1 main3 main4 #main2
+main: main1 main3 main4 main2
 
 # Link and create executable
 main1: main1.o
@@ -34,7 +34,7 @@ main4.o: main4.cpp
 	$(CXX) $(CXXFLAGS) -c main4.cpp -o main4.o
 
 attacker:
-	${C99} attacker.c -o attacker -lpthread
+	${CC} attacker.c -o attacker -lpthread -lm
 
 client:
 	${C99} client.c -o client -lpthread
