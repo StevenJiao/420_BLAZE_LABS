@@ -12,6 +12,7 @@
 #include<cstdlib>
 #include<iostream>
 #include"common.h"
+#include"timer.h"
 
 char **theArray;
 pthread_mutex_t *locks;
@@ -20,14 +21,19 @@ double* times = new double[COM_NUM_REQUEST];
 
 void *ServerEcho(void *args)
 {
-
-    int clientFileDescriptor = *((int*)args);
+    int *arrArgs = (int*) args;
+    int rank = arrArgs[1];
+    int clientFileDescriptor = arrArgs[0];
     char str[COM_BUFF_SIZE];
     ClientRequest *request = new ClientRequest;
+    double start; double end;
 
     // read and parse message
     read(clientFileDescriptor,str,COM_BUFF_SIZE);
     ParseMsg(str, request);
+
+    // start timer
+    GET_TIME(start);
 
     // Perform read ops
     if (!request->is_read){
@@ -42,6 +48,9 @@ void *ServerEcho(void *args)
     pthread_mutex_lock(&locks[request->pos]);
     getContent(request->msg, request->pos, theArray);
     pthread_mutex_unlock(&locks[request->pos]);
+
+    GET_TIME(end);
+    times[rank] = end-start;
 
     // Send data
     write(clientFileDescriptor, request->msg, COM_BUFF_SIZE);
@@ -95,9 +104,9 @@ int main(int argc, char* argv[])
             {
                 clientFileDescriptor=accept(serverFileDescriptor,NULL,NULL);
                 // printf("Connected to client %d\n",clientFileDescriptor);
-
-                int *arg = (int *) malloc(sizeof(*arg));
-                *arg = clientFileDescriptor;
+                int *arg = new int[2];
+                arg[0] = clientFileDescriptor;
+                arg[1] = i;
                 pthread_create(&t[i], NULL, ServerEcho, (void*)arg);
             }
 

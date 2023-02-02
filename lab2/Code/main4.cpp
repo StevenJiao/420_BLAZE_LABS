@@ -13,7 +13,6 @@ char **theArray;
 pthread_rwlock_t *rwlock;
 // for timers
 double* times = new double[COM_NUM_REQUEST];
-int ARR_LEN;
 
 
 void *ServerEcho(void *args)
@@ -38,15 +37,15 @@ void *ServerEcho(void *args)
     // if the request is write
     if (!req->is_read) {
         // protect the critical section and write
-        pthread_rwlock_wrlock(&rwlock[rank % ARR_LEN]);
+        pthread_rwlock_wrlock(&rwlock[req->pos]);
         setContent(req->msg, req->pos, theArray);
-        pthread_rwlock_unlock(&rwlock[rank % ARR_LEN]);
+        pthread_rwlock_unlock(&rwlock[req->pos]);
     }
 
     // get the message from the position
-    pthread_rwlock_rdlock(&rwlock[rank % ARR_LEN]);
+    pthread_rwlock_rdlock(&rwlock[req->pos]);
     getContent(req->msg, req->pos, theArray);
-    pthread_rwlock_unlock(&rwlock[rank % ARR_LEN]);
+    pthread_rwlock_unlock(&rwlock[req->pos]);
 
     GET_TIME(end);
     times[rank] = end-start;
@@ -71,7 +70,7 @@ int main(int argc, char* argv[])
         printf("Error: 3 command line arguments are required.\n"); 
         return 1;
     }
-    ARR_LEN = atoi(argv[1]);
+    int ARR_LEN = atoi(argv[1]);
     char *IP = argv[2];
     const int PORT = atoi(argv[3]);
 
