@@ -69,7 +69,7 @@ void getContent(char* dst, int pos, char **theArray){
 // Function to save the measured time
 // Input: time: pointer to the array that store the time for each request
 //        length: length of the time
-void saveTimes(double* time, int length, char* filename = NULL){
+void saveTimes(double* time, int length, char* filename){
     if (filename == NULL) filename = "server_output_time_aggregated";
     FILE* op;
     int i;
