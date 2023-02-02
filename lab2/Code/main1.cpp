@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
             }
 
             // Record times
-            saveTimes(times, COM_NUM_REQUEST);
+            saveTimes(times, COM_NUM_REQUEST, "main1_aggregate");
             delete times;
             times = new double[COM_NUM_REQUEST];
         }
