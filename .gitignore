@@ -41,3 +41,5 @@ lab2/Code/main1
 lab2/Code/attacker
 lab2/Code/client
 lab2/Code/main4
+.DS_Store
+.gitignore
