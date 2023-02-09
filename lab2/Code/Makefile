@@ -41,7 +41,7 @@ client:
 
 # Zip files for submission
 submission:
-	cd ..; zip -r 1535268.zip Code/ Members/ -x \*main \*.o \*.zip
+	cd ..; zip -r 1535268.zip Code/ Members/ lab_report.pdf -x \*main \*.o \*.zip
 
 # Send files to lab machine for testing
 teleport: submission
