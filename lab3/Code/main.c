@@ -80,6 +80,7 @@ int main(int argc, char* argv[])
 
     // End timing
     GET_TIME(end)
+	printf("Main ran in %f seconds.\n", end-start);
 
     // Save output file
     Lab3SaveOutput(X, size, end-start);
