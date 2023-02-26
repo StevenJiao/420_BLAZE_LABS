@@ -1,21 +1,32 @@
 CC = gcc
 CXX = g++
 C99 = c99
-CFLAGS = -Wall -c
+CFLAGS = -Wall
 CXXFLAGS = -Wall -std=gnu++0x
 MAIN_EXECUTABLE = main
-OTHER_EXECUTABLE = serialtester
-LAB_NUM = 2
+OTHER_EXECUTABLE = serialtester datagen
+GENERATED_DATA_FILES = data_input data_output
+LAB_NUM = 3
 
-# Link and create executable
+all: main datagen serialtester
+
+# e.g. 'make run threads=5'
+run:
+	./datagen
+	./main ${threads}
+	./serialtester
+
 main: main.o lab3io.o
-	$(CXX) main.o Lab3IO.o -o main -lpthread
+	$(CXX) main.o Lab3IO.o -o main -fopenmp
 
-main.o: main.cpp
-	$(CXX) $(CXXFLAGS) -c main.cpp -o main.o
+main.o: main.c
+	$(CC) $(CFLAGS) -c main.c -o main.o
 
 lab3io.o: Lab3IO.c
 	${CC} ${CFLAGS} -c Lab3IO.c -o Lab3IO.o
+
+datagen: datagen.c
+	${CC} ${CFLAGS} datagen.c Lab3IO.c -o datagen
 
 serialtester: serialtester.c
 	${CC} serialtester.c Lab3IO.c -o serialtester -lm
@@ -30,4 +41,4 @@ teleport: submission
 
 # Remove all intermediate files
 clean:
-	rm -rf *.o $(MAIN_EXECUTABLE) $(OTHER_EXECUTABLE)
+	rm -rf *.o ${GENERATED_DATA_FILES} $(MAIN_EXECUTABLE) $(OTHER_EXECUTABLE)
