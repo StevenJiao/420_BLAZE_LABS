@@ -1,4 +1,4 @@
-CC = gcc
+CC = gcc-12
 CXX = g++
 C99 = c99
 CFLAGS = -Wall
