@@ -5,8 +5,7 @@
 #include<netinet/in.h>
 #include<arpa/inet.h>
 #include<unistd.h>
-#include<pthread.h>
-// #include<omp.h>
+#include<omp.h>
 
 #include "timer.h"
 #include "Lab3IO.h"
@@ -33,19 +32,20 @@ int main(int argc, char* argv[])
     /*Load the datasize and verify it*/
 	Lab3LoadInput(&Au, &size);
 
-    // Start timing
-    GET_TIME(start);
-
     /*Calculate the solution by serial code*/
 	X = CreateVec(size);
 	index = malloc(size * sizeof(int));
 	for (i = 0; i < size; ++i)
 		index[i] = i;
 
+    // Start timing
+    GET_TIME(start);
+
 	if (size == 1)
 		X[0] = Au[0][1] / Au[0][0];
 	else{
 		/*Gaussian elimination*/
+        #pragma omp parallel for
 		for (k = 0; k < size - 1; ++k){
 			/*Pivoting*/
 			temp = 0;
@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
 	}
 
     // End timing
-    GET_TIME(end)
+    GET_TIME(end);
 	printf("Main ran in %f seconds.\n", end-start);
 
     // Save output file

@@ -17,10 +17,10 @@ run:
 	./serialtester
 
 main: main.o lab3io.o
-	$(CXX) main.o Lab3IO.o -o main -fopenmp
+	$(CC) main.o Lab3IO.o -o main -fopenmp
 
 main.o: main.c
-	$(CC) $(CFLAGS) -c main.c -o main.o
+	$(CC) $(CFLAGS) -c main.c -o main.o -fopenmp
 
 lab3io.o: Lab3IO.c
 	${CC} ${CFLAGS} -c Lab3IO.c -o Lab3IO.o

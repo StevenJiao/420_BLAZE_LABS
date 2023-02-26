@@ -43,3 +43,8 @@ lab2/Code/client
 lab2/Code/main4
 .DS_Store
 .gitignore
+.vscode/c_cpp_properties.json
+lab3/Code/data_input
+lab3/Code/datagen
+lab3/Code/main
+lab3/Code/serialtester
