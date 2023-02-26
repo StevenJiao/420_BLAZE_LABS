@@ -67,6 +67,8 @@ int main(int argc, char* argv[])
 			}       
 		}
 		/*Jordan elimination*/
+		# pragma omp parallel for shared(Au, X) private(temp,k,i)
+
 		for (k = size - 1; k > 0; --k){
 			for (i = k - 1; i >= 0; --i ){
 				temp = Au[index[i]][k] / Au[index[k]][k];
@@ -80,8 +82,8 @@ int main(int argc, char* argv[])
 	}
 
     // End timing
-    GET_TIME(end);
-	printf("Main ran in %f seconds.\n", end-start);
+    GET_TIME(end)
+	printf("Main ran in %f seconds with %d thread(s).\n", end-start, num_threads);
 
     // Save output file
     Lab3SaveOutput(X, size, end-start);
