@@ -11,8 +11,10 @@ LAB_NUM = 3
 all: main datagen serialtester
 
 # e.g. 'make run threads=5'
+# Runs with 1 thread first then num_threads so we can compare
 run:
 	./datagen
+	./main 1
 	./main ${threads}
 	./serialtester
 
