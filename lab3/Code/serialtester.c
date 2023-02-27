@@ -10,6 +10,7 @@ Compiling:
 #include <stdlib.h>
 #include <math.h>
 #include "Lab3IO.h"
+#include "timer.h"
 
 #define TOL 0.0005
 
@@ -20,6 +21,8 @@ int main(int argc, char* argv[]){
 	double temp, error, Xnorm;
 	int* index;
 	FILE* fp;
+
+	double start, end;
 
 	/*Load the datasize and verify it*/
 	Lab3LoadInput(&Au, &size);
@@ -37,6 +40,9 @@ int main(int argc, char* argv[]){
 	index = malloc(size * sizeof(int));
 	for (i = 0; i < size; ++i)
 		index[i] = i;
+
+	// Start timing
+    GET_TIME(start);
 
 	if (size == 1)
 		X[0] = Au[0][1] / Au[0][0];
@@ -90,6 +96,10 @@ int main(int argc, char* argv[]){
 		printf("Congratulation!!! Your result is accepted!\n");
 	else
 		printf("Sorry, your result is wrong.\n");
+
+	// End timing
+    GET_TIME(end);
+	printf("Serial ran in %f seconds.\n", end-start);
 	
 	fclose(fp);
 	DestroyVec(X);
