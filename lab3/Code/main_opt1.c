@@ -13,12 +13,13 @@
 
 int main(int argc, char* argv[])
 {
-    int i, j, k, max, max_i, size;
+    int i, j, k, size, max, max_i;
 	double** Au;
 	double* X;
 	double temp;
 	int* index;
     double start, end;
+	int row_max, row_max_i;
 
     // Ensure we got enough arguements
     if (argc != 2) {
@@ -58,6 +59,27 @@ int main(int argc, char* argv[])
 					max = Au[index[i]][k]*Au[index[i]][k];
 				}
 			}
+			// #pragma omp parallel default(none) shared(row_max, row_max_i, size, k, Au, index) num_threads(num_threads)
+			// {
+			// 	int max = 0;
+			// 	int max_i = 0;
+			// 	#pragma omp for nowait
+			// 	for (int i=k; i<size; i++) {
+			// 		if (Au[index[i]][k] * Au[index[i]][k] > max) {
+			// 			max_i = i;
+			// 			max = Au[index[i]][k]*Au[index[i]][k];
+			// 		}
+			// 	}
+
+			// 	#pragma omp critical
+			// 	{
+			// 		if (max > row_max) {
+			// 			row_max = max;
+			// 			row_max_i = max_i;
+			// 		}
+			// 	}
+
+			// }
 			
 			/* Pivoting - Swap row k with row having max col k*/
 			if (max_i != k) {
