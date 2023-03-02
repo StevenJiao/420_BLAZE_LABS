@@ -6,8 +6,6 @@
 #include<arpa/inet.h>
 #include<unistd.h>
 #include<pthread.h>
-#include<omp.h>
-#include <omp.h>
 
 #include "timer.h"
 #include "Lab3IO.h"
@@ -68,7 +66,6 @@ int main(int argc, char* argv[])
 			}
 
 			/*calculating*/
-			#pragma omp parallel for default(none) private(i, j, temp) shared(index, Au, k, size) num_threads(num_threads)
 			for (i=k+1; i<size; i++) {
 				temp = Au[index[i]][k] / Au[index[k]][k];
 				for (j=k; j<size+1; j++) {
