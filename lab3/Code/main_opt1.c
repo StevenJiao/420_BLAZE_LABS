@@ -107,6 +107,7 @@ int main(int argc, char* argv[])
 			} 
 		}
 		/*Solution*/
+		#pragma omp parallel for num_threads(num_threads) 
 		for (k=0; k< size; ++k) {
 			X[k] = Au[index[k]][size] / Au[index[k]][k];
 		}
