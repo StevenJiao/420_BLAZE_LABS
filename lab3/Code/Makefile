@@ -3,17 +3,21 @@ CXX = g++
 C99 = c99
 CFLAGS = -Wall
 CXXFLAGS = -Wall -std=gnu++0x
-MAIN_EXECUTABLE = main_unopt main_opt1
+MAIN_EXECUTABLE = main_unopt main_opt1 main_opt2 main_opt3 main_opt4
 OTHER_EXECUTABLE = serialtester datagen
-GENERATED_DATA_FILES = data_input data_output
+GENERATED_DATA_FILES = data_input data_output 
 LAB_NUM = 3
 
-compile: main_opt1 datagen serialtester
+compile: main_opt1 main_opt2 main_opt3 main_opt4 datagen serialtester
 
 # e.g. 'make run threads=5'
 # Runs with 1 thread first then num_threads so we can compare
 run: compile
+	./datagen -s 1000
 	./main_opt1 ${threads}
+	./main_opt2 ${threads}
+	./main_opt3 ${threads}
+	./main_opt4 ${threads}
 	./serialtester
 
 main_unopt: main_unopt.o lab3io.o
@@ -39,6 +43,12 @@ main_opt3: main_opt3.o lab3io.o
 
 main_opt3.o: main_opt3.c
 	$(CC) $(CFLAGS) -c main_opt3.c -o main_opt3.o -fopenmp
+
+main_opt4: main_opt4.o lab3io.o
+	$(CC) main_opt4.o Lab3IO.o -o main_opt4 -fopenmp
+
+main_opt4.o: main_opt4.c
+	$(CC) $(CFLAGS) -c main_opt4.c -o main_opt4.o -fopenmp
 
 lab3io.o: Lab3IO.c
 	${CC} ${CFLAGS} -c Lab3IO.c -o Lab3IO.o

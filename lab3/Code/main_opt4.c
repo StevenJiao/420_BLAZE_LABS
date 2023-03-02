@@ -13,7 +13,7 @@
 int main(int argc, char* argv[])
 {
 
-    int i, j, k, size;
+    int i, j, k, size, local_max_i, local_max, max_i, max;
 	double** Au;
 	double* X;
 	double temp;
@@ -45,29 +45,39 @@ int main(int argc, char* argv[])
 	if (size == 1)
 		X[0] = Au[0][1] / Au[0][0];
 	else {
-		#pragma omp parallel num_threads(num_threads) default(none) shared(index, Au, size, X) private(temp, j, k, i)
+		#pragma omp parallel num_threads(num_threads) default(none) shared(index, Au, size, X, max_i, max) private(j, k, temp, i, local_max_i, local_max)
 		{
 			/*Gaussian elimination*/
 			for (k = 0; k < size - 1; ++k){
 				/*Pivoting*/
-				#pragma omp single
-				{
-					temp = 0;
-					j = 0;
-					for (i = k; i < size; ++i)
-						if (temp < Au[index[i]][k] * Au[index[i]][k]){
-							temp = Au[index[i]][k] * Au[index[i]][k];
-							j = i;
-						}
+                max = 0;
+                max_i = 0;
+                #pragma omp for
+                for (i= k; i < size; ++i)
+                    if (max < Au[index[i]][k] * Au[index[i]][k]){
+                        local_max = Au[index[i]][k] * Au[index[i]][k];
+                        local_max_i = i;
+                    }
 
+                #pragma omp critical
+                {
+                    if (local_max > max) {
+                        max = local_max;
+                        max_i = local_max_i;
+                    }
+                }
+                
+                #pragma omp barrier
 
-					if (j != k)/*swap*/{
-						i = index[j];
-						index[j] = index[k];
-						index[k] = i;
-					}
-				}
-
+                #pragma omp single
+                {
+                    if (max_i != k)/*swap*/{
+                        i = index[max_i];
+                        index[max_i] = index[k];
+                        index[k] = i;
+                    }
+                }
+                
 				/*calculating*/
 				#pragma omp for
 				for (i = k + 1; i < size; ++i){
@@ -97,7 +107,7 @@ int main(int argc, char* argv[])
 
     // End timing
     GET_TIME(end)
-	printf("Main optimized 3 ran in %f seconds with %d thread(s).\n", end-start, num_threads);
+	printf("Main optimized 4 ran in %f seconds with %d thread(s).\n", end-start, num_threads);
 
     // Save output file
     Lab3SaveOutput(X, size, end-start);
