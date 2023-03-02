@@ -8,13 +8,11 @@ OTHER_EXECUTABLE = serialtester datagen
 GENERATED_DATA_FILES = data_input data_output
 LAB_NUM = 3
 
-compile: main_unopt main_opt1 datagen serialtester
+compile: main_opt1 datagen serialtester
 
 # e.g. 'make run threads=5'
 # Runs with 1 thread first then num_threads so we can compare
 run: compile
-	./datagen
-	./main_unopt 1
 	./main_opt1 ${threads}
 	./serialtester
 
@@ -29,6 +27,18 @@ main_opt1: main_opt1.o lab3io.o
 
 main_opt1.o: main_opt1.c
 	$(CC) $(CFLAGS) -c main_opt1.c -o main_opt1.o -fopenmp
+
+main_opt2: main_opt2.o lab3io.o
+	$(CC) main_opt2.o Lab3IO.o -o main_opt2 -fopenmp
+
+main_opt2.o: main_opt2.c
+	$(CC) $(CFLAGS) -c main_opt2.c -o main_opt2.o -fopenmp
+
+main_opt3: main_opt3.o lab3io.o
+	$(CC) main_opt3.o Lab3IO.o -o main_opt3 -fopenmp
+
+main_opt3.o: main_opt3.c
+	$(CC) $(CFLAGS) -c main_opt3.c -o main_opt3.o -fopenmp
 
 lab3io.o: Lab3IO.c
 	${CC} ${CFLAGS} -c Lab3IO.c -o Lab3IO.o
