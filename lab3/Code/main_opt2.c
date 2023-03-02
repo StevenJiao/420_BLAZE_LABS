@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
 
     // End timing
     GET_TIME(end)
-	printf("Main ran in %f seconds with %d thread(s).\n", end-start, num_threads);
+	printf("Main optimized 2 ran in %f seconds with %d thread(s).\n", end-start, num_threads);
 
     // Save output file
     Lab3SaveOutput(X, size, end-start);
