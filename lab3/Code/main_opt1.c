@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
     int i, j, k, size, max, max_i;
 	double** Au;
 	double* X;
-	double temp;
+	double swap_temp, temp;
 	int* index;
     double start, end;
 	int row_max, row_max_i;
@@ -50,62 +50,61 @@ int main(int argc, char* argv[])
 		/*Gaussian elimination*/
 		for (int k=0; k<size-1; k++) {
 			
-			/*Pivoting - Find row with max col k*/
-			max = 0;
-			max_i = 0;
-			for (int i=k; i<size; i++) {
-				if (Au[index[i]][k] * Au[index[i]][k] > max) {
-					max_i = i;
-					max = Au[index[i]][k]*Au[index[i]][k];
+			// Reset row max
+			row_max = -1;
+
+			#pragma omp parallel default(none) shared(row_max, row_max_i, size, k, Au, index, swap_temp) private(max, max_i) num_threads(num_threads)
+			{
+				max = 0;
+				max_i = 0;
+				#pragma omp for
+				for (int i=k; i<size; i++) {
+					if (Au[index[i]][k] * Au[index[i]][k] > max) {
+						max_i = i;
+						max = Au[index[i]][k]*Au[index[i]][k];
+					}
 				}
-			}
-			// #pragma omp parallel default(none) shared(row_max, row_max_i, size, k, Au, index) num_threads(num_threads)
-			// {
-			// 	int max = 0;
-			// 	int max_i = 0;
-			// 	#pragma omp for nowait
-			// 	for (int i=k; i<size; i++) {
-			// 		if (Au[index[i]][k] * Au[index[i]][k] > max) {
-			// 			max_i = i;
-			// 			max = Au[index[i]][k]*Au[index[i]][k];
-			// 		}
-			// 	}
 
-			// 	#pragma omp critical
-			// 	{
-			// 		if (max > row_max) {
-			// 			row_max = max;
-			// 			row_max_i = max_i;
-			// 		}
-			// 	}
-
-			// }
-			
-			/* Pivoting - Swap row k with row having max col k*/
-			if (max_i != k) {
-				temp = index[max_i];
-				index[max_i] = index[k];
-				index[k] = temp;
-			}
-
-			/*calculating*/
-			#pragma omp parallel for private(i, j, temp) shared(index, Au, k, size) num_threads(num_threads)
-			for (i=k+1; i<size; i++) {
-				temp = Au[index[i]][k] / Au[index[k]][k];
-				for (j=k; j<size+1; j++) {
-					Au[index[i]][j] -= temp * Au[index[k]][j];
+				#pragma omp critical
+				{
+					if (max > row_max) {
+						row_max = max;
+						row_max_i = max_i;
+					}
 				}
+
+				/* Pivoting - Swap row k with row having max col k */
+				#pragma omp single
+				{
+					if (row_max_i != k) {
+						// printf("row max = %d\n", row_max);
+						swap_temp = index[row_max_i];
+						index[row_max_i] = index[k];
+						index[k] = swap_temp;
+					}
+				}  // Implicit barrier here
+
+				/* Calculating */
+				#pragma omp for private(i, j, temp)
+				for (i=k+1; i<size; i++) {
+					temp = Au[index[i]][k] / Au[index[k]][k];
+					for (j=k; j<size+1; j++) {
+						Au[index[i]][j] -= temp * Au[index[k]][j];
+					}
+				}
+
 			}
 		}
 		
-
 		/*Jordan elimination*/
+		#pragma omp parallel for num_threads(num_threads) 
 		for (k=size-1; k>=1; k--) {
 			for (i=0; i<k; i++) {
 				Au[index[i]][size] -= Au[index[i]][k] / Au[index[k]][k] * Au[index[k]][size];
 				Au[index[i]][k] = 0;
 			} 
 		}
+		
 		/*Solution*/
 		#pragma omp parallel for num_threads(num_threads) 
 		for (k=0; k< size; ++k) {
