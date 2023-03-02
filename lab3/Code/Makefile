@@ -13,7 +13,7 @@ compile: main_opt1 main_opt2 main_opt3 main_opt4 datagen serialtester
 # e.g. 'make run threads=5'
 # Runs with 1 thread first then num_threads so we can compare
 run: compile
-	./datagen -s 1000
+	./datagen -s ${arr_size}
 	./main_opt1 ${threads}
 	./main_opt2 ${threads}
 	./main_opt3 ${threads}
