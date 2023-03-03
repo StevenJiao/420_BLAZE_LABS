@@ -70,7 +70,6 @@ int main(int argc, char* argv[])
                         max_i = local_max_i;
                     }
                 }
-                
                 #pragma omp barrier
 
                 #pragma omp single
@@ -83,7 +82,7 @@ int main(int argc, char* argv[])
                 }
                 
 				/*calculating*/
-				#pragma omp for
+				#pragma omp for schedule(guided)
 				for (i = k + 1; i < size; ++i){
 					temp = Au[index[i]][k] / Au[index[k]][k];
 					for (j = k; j < size + 1; ++j)
@@ -94,7 +93,7 @@ int main(int argc, char* argv[])
 
 			/*Jordan elimination*/
 			for (k = size - 1; k > 0; --k){
-				#pragma omp for
+				#pragma omp for schedule(guided)
 				for (i = k - 1; i >= 0; --i ){
 					temp = Au[index[i]][k] / Au[index[k]][k];
 					Au[index[i]][k] -= temp * Au[index[k]][k];
@@ -103,7 +102,7 @@ int main(int argc, char* argv[])
 			}
 
 			/*solution*/
-			#pragma omp for
+			#pragma omp for schedule(guided)
 			for (k=0; k< size; ++k)
 				X[k] = Au[index[k]][size] / Au[index[k]][k];
 		}
