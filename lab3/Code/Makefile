@@ -1,4 +1,4 @@
-CC = gcc-12
+CC = gcc
 CXX = g++
 C99 = c99
 CFLAGS = -Wall
@@ -10,10 +10,10 @@ LAB_NUM = 3
 
 compile: main_unopt main_opt1 main_opt2 main_opt3 main_opt4 datagen serialtester
 
-# e.g. 'make run threads=5'
+# e.g. 'make run threads=5 arr_size=1000
 # Runs with 1 thread first then num_threads so we can compare
 run: compile
-	./datagen -s ${arr_size}
+	./datagen ${arr_size}
 	./main_unopt ${threads}
 	./main_opt1 ${threads}
 	./main_opt2 ${threads}
@@ -22,34 +22,34 @@ run: compile
 	./serialtester
 
 main_unopt: main_unopt.o lab3io.o
-	$(CC) main_unopt.o Lab3IO.o -o main_unopt -fopenmp
+	$(C99) main_unopt.o Lab3IO.o -o main_unopt -fopenmp
 
 main_unopt.o: main_unopt.c
-	$(CC) $(CFLAGS) -c main_unopt.c -o main_unopt.o -fopenmp
+	$(C99) $(CFLAGS) -c main_unopt.c -o main_unopt.o -fopenmp
 
 main_opt1: main_opt1.o lab3io.o
-	$(CC) main_opt1.o Lab3IO.o -o main_opt1 -fopenmp
+	$(C99) main_opt1.o Lab3IO.o -o main_opt1 -fopenmp
 
 main_opt1.o: main_opt1.c
-	$(CC) $(CFLAGS) -c main_opt1.c -o main_opt1.o -fopenmp
+	$(C99) $(CFLAGS) -c main_opt1.c -o main_opt1.o -fopenmp
 
 main_opt2: main_opt2.o lab3io.o
-	$(CC) main_opt2.o Lab3IO.o -o main_opt2 -fopenmp
+	$(C99) main_opt2.o Lab3IO.o -o main_opt2 -fopenmp
 
 main_opt2.o: main_opt2.c
-	$(CC) $(CFLAGS) -c main_opt2.c -o main_opt2.o -fopenmp
+	$(C99) $(CFLAGS) -c main_opt2.c -o main_opt2.o -fopenmp
 
 main_opt3: main_opt3.o lab3io.o
-	$(CC) main_opt3.o Lab3IO.o -o main_opt3 -fopenmp
+	$(C99) main_opt3.o Lab3IO.o -o main_opt3 -fopenmp
 
 main_opt3.o: main_opt3.c
-	$(CC) $(CFLAGS) -c main_opt3.c -o main_opt3.o -fopenmp
+	$(C99) $(CFLAGS) -c main_opt3.c -o main_opt3.o -fopenmp
 
 main_opt4: main_opt4.o lab3io.o
-	$(CC) main_opt4.o Lab3IO.o -o main_opt4 -fopenmp
+	$(C99) main_opt4.o Lab3IO.o -o main_opt4 -fopenmp
 
 main_opt4.o: main_opt4.c
-	$(CC) $(CFLAGS) -c main_opt4.c -o main_opt4.o -fopenmp
+	$(C99) $(CFLAGS) -c main_opt4.c -o main_opt4.o -fopenmp
 
 lab3io.o: Lab3IO.c
 	${CC} ${CFLAGS} -c Lab3IO.c -o Lab3IO.o
