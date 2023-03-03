@@ -9,6 +9,7 @@
 #include<netinet/in.h>
 #include<arpa/inet.h>
 #include<unistd.h>
+#include<pthread.h>
 #include<omp.h>
 
 #include "timer.h"
@@ -16,8 +17,7 @@
 
 int main(int argc, char* argv[])
 {
-
-    int i, j, k, size;
+    int i, j, k, max, max_i, size;
 	double** Au;
 	double* X;
 	double temp;
@@ -33,69 +33,64 @@ int main(int argc, char* argv[])
     // Get argument values
     int num_threads = atoi(argv[1]);
 
-    /*Load the datasize and verify it*/
+	// Load data
 	Lab3LoadInput(&Au, &size);
-
-    /*Calculate the solution by serial code*/
 	X = CreateVec(size);
+
+	// Initialize index
 	index = malloc(size * sizeof(int));
-	for (i = 0; i < size; ++i)
+	for (int i = 0; i < size; ++i)
 		index[i] = i;
 
-    // Start timing
+	// Start timing
     GET_TIME(start);
 
-		// 1x1 array case
+	// 1x1 array case
 	if (size == 1)
 		X[0] = Au[0][1] / Au[0][0];
 	else {
-		#pragma omp parallel num_threads(num_threads) default(none) shared(index, Au, size, X) private(temp, j, k, i)
-		{
-			/*Gaussian elimination*/
-			for (k = 0; k < size - 1; ++k){
-				/*Pivoting*/
-				#pragma omp single
-				{
-					temp = 0;
-					j = 0;
-					for (i = k; i < size; ++i)
-						if (temp < Au[index[i]][k] * Au[index[i]][k]){
-							temp = Au[index[i]][k] * Au[index[i]][k];
-							j = i;
-						}
-
-
-					if (j != k)/*swap*/{
-						i = index[j];
-						index[j] = index[k];
-						index[k] = i;
-					}
+		
+		/*Gaussian elimination*/
+		for (int k=0; k<size-1; k++) {
+			
+			/*Pivoting - Find row with max col k*/
+			max = 0;
+			max_i = 0;
+			for (int i=k; i<size; i++) {
+				if (Au[index[i]][k] * Au[index[i]][k] > max) {
+					max_i = i;
+					max = Au[index[i]][k]*Au[index[i]][k];
 				}
-
-				/*calculating*/
-				#pragma omp for
-				for (i = k + 1; i < size; ++i){
-					temp = Au[index[i]][k] / Au[index[k]][k];
-					for (j = k; j < size + 1; ++j)
-						Au[index[i]][j] -= Au[index[k]][j] * temp;
-				}       
-	
+			}
+			
+			/* Pivoting - Swap row k with row having max col k*/
+			if (max_i != k) {
+				temp = index[max_i];
+				index[max_i] = index[k];
+				index[k] = temp;
 			}
 
-			/*Jordan elimination*/
-			for (k = size - 1; k > 0; --k){
-				#pragma omp for
-				for (i = k - 1; i >= 0; --i ){
-					temp = Au[index[i]][k] / Au[index[k]][k];
-					Au[index[i]][k] -= temp * Au[index[k]][k];
-					Au[index[i]][size] -= temp * Au[index[k]][size];
-				} 
+			/*calculating*/
+			#pragma omp parallel for private(i, j, temp) shared(index, Au, k, size) num_threads(num_threads)
+			for (i=k+1; i<size; i++) {
+				temp = Au[index[i]][k] / Au[index[k]][k];
+				for (j=k; j<size+1; j++) {
+					Au[index[i]][j] -= temp * Au[index[k]][j];
+				}
 			}
+		}
+		
 
-			/*solution*/
-			#pragma omp for
-			for (k=0; k< size; ++k)
-				X[k] = Au[index[k]][size] / Au[index[k]][k];
+		/*Jordan elimination*/
+		for (k=size-1; k>=1; k--) {
+			for (i=0; i<k; i++) {
+				Au[index[i]][size] -= Au[index[i]][k] / Au[index[k]][k] * Au[index[k]][size];
+				Au[index[i]][k] = 0;
+			} 
+		}
+		/*Solution*/
+		for (k=0; k< size; ++k) {
+			X[k] = Au[index[k]][size] / Au[index[k]][k];
 		}
 	}
 
@@ -105,6 +100,11 @@ int main(int argc, char* argv[])
 
     // Save output file
     Lab3SaveOutput(X, size, end-start);
+
+	// Free memory
+	DestroyVec(X);
+	DestroyMat(Au, size);
+	free(index);
 
     return 0;
 }
