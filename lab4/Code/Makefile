@@ -37,3 +37,10 @@ teleport: submission
 # Remove all intermediate files
 clean:
 	rm -rf *.o ${GENERATED_DATA_FILES} $(MAIN_EXECUTABLE) $(OTHER_EXECUTABLE)
+
+# Temporary
+move: main clean teleport
+	ssh 420 -f 'cd labs/lab4/Code && make move_to_nodes && exit'
+
+r:
+	ssh 420 -f 'cd labs/lab4/Code && make run num_p=4 && exit'
