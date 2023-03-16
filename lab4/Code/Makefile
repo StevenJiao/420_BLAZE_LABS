@@ -1,15 +1,20 @@
 CC = gcc
 CXX = g++
 C99 = c99
-CFLAGS = -Wall
+MPI = mpicc
+CFLAGS = -g -Wall
 CXXFLAGS = -Wall -std=gnu++0x
 MAIN_EXECUTABLE = main
 OTHER_EXECUTABLE = serialtester datatrim
 GENERATED_DATA_FILES = 
 LAB_NUM = 4
 
+# make run num_p = 4
+run:
+	mpirun -np ${num_p} ./${MAIN_EXECUTABLE}
+
 main:
-	${CC} main.cpp -o main
+	${MPI} ${CFLAGS} main.cpp -o main
 
 datatrim:
 	${CC} datatrim.c -o datatrim
