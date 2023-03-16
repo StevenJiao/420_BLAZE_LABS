@@ -13,6 +13,9 @@ compile:
 serialtester: serialtester.c
 	${CC} serialtester.c Lab4IO.c -o serialtester -lm
 
+move_to_nodes:
+	scp -r 
+
 # Zip files for submission
 submission:
 	cd ..; zip -r 1535268.zip Code/ Members/ Report/ -x \*main \*.o \*.zip
