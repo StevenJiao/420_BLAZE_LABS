@@ -10,6 +10,9 @@ LAB_NUM = 4
 
 compile:
 
+datatrim:
+	${CC} datatrim.c -o datatrim
+
 serialtester: serialtester.c
 	${CC} serialtester.c Lab4IO.c -o serialtester -lm
 
