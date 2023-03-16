@@ -9,12 +9,14 @@ OTHER_EXECUTABLE = serialtester datatrim
 GENERATED_DATA_FILES = 
 LAB_NUM = 4
 
+all: main datatrim serialtester
+
 # make run num_p = 4
 run:
 	mpirun -np ${num_p} ./${MAIN_EXECUTABLE}
 
 main:
-	${MPI} ${CFLAGS} main.cpp -o main
+	${MPI} ${CFLAGS} main.c -o main
 
 datatrim:
 	${CC} datatrim.c -o datatrim
