@@ -49,3 +49,5 @@ lab3/Code/datagen
 lab3/Code/main
 lab3/Code/serialtester
 .vscode/settings.json
+lab4/Code/datatrim
+.gitignore
