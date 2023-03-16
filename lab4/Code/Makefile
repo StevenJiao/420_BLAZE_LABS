@@ -4,7 +4,7 @@ C99 = c99
 CFLAGS = -Wall
 CXXFLAGS = -Wall -std=gnu++0x
 MAIN_EXECUTABLE = 
-OTHER_EXECUTABLE = 
+OTHER_EXECUTABLE = serialtester datatrim
 GENERATED_DATA_FILES = 
 LAB_NUM = 4
 
@@ -13,11 +13,12 @@ compile:
 datatrim:
 	${CC} datatrim.c -o datatrim
 
-serialtester: serialtester.c
-	${CC} serialtester.c Lab4IO.c -o serialtester -lm
+serialtester:
+	${CC} serialtester.c Lab4_IO.c -o serialtester -lm
 
+# will only work when logged into master node
 move_to_nodes:
-	scp -r 
+	scp -r ${MAIN_EXECUTABLE} user_07@192.168.1.55:;scp -r ${MAIN_EXECUTABLE} user_07@192.168.1.88:;scp -r ${MAIN_EXECUTABLE} user_07@192.168.1.104:;
 
 # Zip files for submission
 submission:
