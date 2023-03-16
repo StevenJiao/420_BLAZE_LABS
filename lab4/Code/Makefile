@@ -3,12 +3,13 @@ CXX = g++
 C99 = c99
 CFLAGS = -Wall
 CXXFLAGS = -Wall -std=gnu++0x
-MAIN_EXECUTABLE = 
+MAIN_EXECUTABLE = main
 OTHER_EXECUTABLE = serialtester datatrim
 GENERATED_DATA_FILES = 
 LAB_NUM = 4
 
-compile:
+main:
+	${CC} main.cpp -o main
 
 datatrim:
 	${CC} datatrim.c -o datatrim
@@ -22,7 +23,7 @@ move_to_nodes:
 
 # Zip files for submission
 submission:
-	cd ..; zip -r 1535268.zip Code/ Members/ Report/ -x \*main \*.o \*.zip
+	cd ..; zip -r 1535268.zip Code/ Members/ Report/ -x \main \*.o \*.zip \web-Stanford.txt
 
 # Send files to lab machine for testing
 teleport: submission
