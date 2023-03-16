@@ -1,32 +1,29 @@
-CC = gcc-12
+CC = gcc
 CXX = g++
 C99 = c99
 CFLAGS = -Wall
 CXXFLAGS = -Wall -std=gnu++0x
 MAIN_EXECUTABLE = main
 OTHER_EXECUTABLE = serialtester datatrim
+GENERATED_DATA_FILES = 
 LAB_NUM = 4
 
-all: main lab4io.o datatrim serialtester
+main:
+	${CC} main.cpp -o main
 
-main: main.o
-	${CXX} main.o -o main
+datatrim:
+	${CC} datatrim.c -o datatrim
 
-main.o: main.cpp
-	$(CXX) $(CXXFLAGS) -c main.cpp -o main.o
-
-lab4io.o: Lab4_IO.c
-	${CC} ${CFLAGS} -c Lab4_IO.c -o Lab4_IO.o
-
-datatrim: datatrim.c
-	${CC} ${CFLAGS} datatrim.c -o datatrim
-
-serialtester: serialtester.c
+serialtester:
 	${CC} serialtester.c Lab4_IO.c -o serialtester -lm
+
+# will only work when logged into master node
+move_to_nodes:
+	scp -r ${MAIN_EXECUTABLE} user_07@192.168.1.55:;scp -r ${MAIN_EXECUTABLE} user_07@192.168.1.88:;scp -r ${MAIN_EXECUTABLE} user_07@192.168.1.104:;
 
 # Zip files for submission
 submission:
-	cd ..; zip -r 1535268.zip Code/ Members/ Report/ -x \*main \*.o \*.zip
+	cd ..; zip -r 1535268.zip Code/ Members/ Report/ -x \main \*.o \*.zip \web-Stanford.txt
 
 # Send files to lab machine for testing
 teleport: submission

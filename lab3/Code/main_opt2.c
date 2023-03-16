@@ -77,6 +77,8 @@ int main(int argc, char* argv[])
 					}
 				}
 
+                #pragma omp barrier
+
 				/* Pivoting - Swap row k with row having max col k */
 				#pragma omp single
 				{
