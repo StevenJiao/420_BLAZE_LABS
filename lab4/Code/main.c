@@ -1,6 +1,6 @@
 #define LAB4_EXTEND
 
-// #include <mpi.h>
+#include <mpi.h>
 #include <stdio.h>
 #include "Lab4_IO.h"
 #include "timer.h"
