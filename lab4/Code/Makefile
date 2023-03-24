@@ -2,7 +2,7 @@ CC = gcc
 CXX = g++
 C99 = c99
 MPI = mpicc
-CFLAGS = -g -Wall
+CFLAGS = -Wall
 CXXFLAGS = -Wall -std=gnu++0x
 MAIN_EXECUTABLE = main
 OTHER_EXECUTABLE = serialtester datatrim
@@ -16,13 +16,16 @@ run:
 	mpirun -np ${num_p} ./${MAIN_EXECUTABLE}
 
 main:
-	${MPI} ${CFLAGS} main.c -o main
+	${MPI} ${CFLAGS} main.c Lab4_IO.c -o main -lm
 
-datatrim:
-	${CC} datatrim.c -o datatrim
+datatrim: datatrim.o
+	${CC} ${CFLAGS} datatrim.o -o datatrim
+
+datatrim.o: datatrim.c
+	${CC} ${CFLAGS} -c datatrim.c
 
 serialtester:
-	${CC} serialtester.c Lab4_IO.c -o serialtester -lm
+	${CC} ${CFLAGS} serialtester.c Lab4_IO.c -o serialtester -lm
 
 # will only work when logged into master node
 move_to_nodes:

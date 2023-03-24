@@ -25,29 +25,29 @@ int main(int argc, char* argv[])
     double start, end;
     FILE *fp, *ip;
 
-    // Load the data and simple verification
-    if ((fp = fopen("data_output", "r")) == NULL ){
-    	printf("Error loading the data_output.\n");
-        return 253;
-    }
-    fscanf(fp, "%d\n%lf\n", &collected_nodecount, &error);
+    // // Load the data and simple verification
+    // if ((fp = fopen("data_output", "r")) == NULL ){
+    // 	printf("Error loading the data_output.\n");
+    //     return 253;
+    // }
+    // fscanf(fp, "%d\n%lf\n", &collected_nodecount, &error);
     if ((ip = fopen("data_input_meta","r")) == NULL) {
         printf("Error opening the data_input_meta file.\n");
         return 254;
     }
     fscanf(ip, "%d\n", &nodecount);
-    if (nodecount != collected_nodecount){
-        printf("Problem size does not match!\n");
-        return 2;
-    }
+    // if (nodecount != collected_nodecount){
+    //     printf("Problem size does not match!\n");
+    //     return 2;
+    // }
     fclose(ip);
-    collected_r = malloc(collected_nodecount * sizeof(double));
-    for ( i = 0; i < collected_nodecount; ++i)
-        fscanf(fp, "%lf\n", &collected_r[i]);
-    fclose(fp);
+    // collected_r = malloc(collected_nodecount * sizeof(double));
+    // for ( i = 0; i < collected_nodecount; ++i)
+    //     fscanf(fp, "%lf\n", &collected_r[i]);
+    // fclose(fp);
 
-    // Adjust the threshold according to the problem size
-    cst_addapted_threshold = THRESHOLD;
+    // // Adjust the threshold according to the problem size
+    // cst_addapted_threshold = THRESHOLD;
     
     if (node_init(&nodehead, 0, nodecount)) return 254;
     // initialize variables
@@ -80,6 +80,8 @@ int main(int argc, char* argv[])
     
     GET_TIME(end);
     printf("Program converged at %d th iteration.\nElapsed time %f.\n", iterationcount, end-start);
+
+    Lab4_saveoutput(r, nodecount, end-start);
 
     // post processing
     node_destroy(nodehead, nodecount);
