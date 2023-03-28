@@ -75,4 +75,6 @@ int main(int argc, char* argv[])
     // post processing
     node_destroy(nodehead, nodecount);
     free(contribution);
+
+    return 0;
 }
