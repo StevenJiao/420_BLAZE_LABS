@@ -23,6 +23,11 @@ int main(int argc, char* argv[])
     double start, end;
     FILE *ip;
 
+    int npes, myrank;
+    MPI_Init(&argc, &argv);
+    MPI_Comm_size(MPI_COMM_WORLD, &npes);
+    MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+
     // Read the input file
     if ((ip = fopen("data_input_meta","r")) == NULL) {
         printf("Error opening the data_input_meta file.\n");
@@ -67,12 +72,14 @@ int main(int argc, char* argv[])
         }
     } while(rel_error(r, r_pre, nodecount) >= EPSILON);
     
+    // Finish timing and save output
     GET_TIME(end);
-    printf("Program converged at %d th iteration.\nElapsed time %f.\n", iterationcount, end-start);
-
+    printf("Program converged at %d th iteration - Elapsed time %f - Process %d out of %d\n", iterationcount, end-start, myrank + 1, npes);
     Lab4_saveoutput(r, nodecount, end-start);
 
-    // post processing
+    MPI_Finalize();
+
+    // Release memory
     node_destroy(nodehead, nodecount);
     free(contribution);
 
