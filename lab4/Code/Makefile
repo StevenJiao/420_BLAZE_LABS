@@ -18,6 +18,9 @@ run:
 main: lab4io.o
 	${MPI} ${CFLAGS} main.c Lab4_IO.o -o main -lm
 
+main-serial: lab4io.o
+	${MPI} ${CFLAGS} main_serial.c Lab4_IO.o -o main -lm
+
 lab4io.o: Lab4_IO.c
 	${CC} ${CFLAGS} -c Lab4_IO.c -o Lab4_IO.o
 
