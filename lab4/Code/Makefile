@@ -6,7 +6,7 @@ CFLAGS = -g -Wall
 CXXFLAGS = -Wall -std=gnu++0x
 MAIN_EXECUTABLE = main
 OTHER_EXECUTABLE = serialtester datatrim
-GENERATED_DATA_FILES = 
+GENERATED_DATA_FILES = data_input_link data_input_meta
 LAB_NUM = 4
 
 all: main datatrim serialtester
@@ -15,10 +15,13 @@ all: main datatrim serialtester
 run:
 	mpirun -np ${num_p} ./${MAIN_EXECUTABLE}
 
-main:
-	${MPI} ${CFLAGS} main.c -o main
+main: lab4io.o
+	${MPI} ${CFLAGS} main.c Lab4_IO.o -o main -lm
 
-datatrim:
+lab4io.o: Lab4_IO.c
+	${CC} ${CFLAGS} -c Lab4_IO.c -o Lab4_IO.o
+
+datatrim: datatrim.c
 	${CC} datatrim.c -o datatrim
 
 serialtester:
