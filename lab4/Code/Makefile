@@ -2,7 +2,7 @@ CC = gcc
 CXX = g++
 C99 = c99
 MPI = mpicc
-CFLAGS = -g -Wall
+CFLAGS = -Wall
 CXXFLAGS = -Wall -std=gnu++0x
 MAIN_EXECUTABLE = main
 OTHER_EXECUTABLE = serialtester datatrim
@@ -25,7 +25,7 @@ datatrim: datatrim.c
 	${CC} datatrim.c -o datatrim
 
 serialtester:
-	${CC} serialtester.c Lab4_IO.c -o serialtester -lm
+	${CC} ${CFLAGS} serialtester.c Lab4_IO.c -o serialtester -lm
 
 # will only work when logged into master node
 move_to_nodes:

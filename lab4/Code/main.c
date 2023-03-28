@@ -1,6 +1,6 @@
 #define LAB4_EXTEND
 
-// #include <mpi.h>
+#include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -69,6 +69,8 @@ int main(int argc, char* argv[])
     
     GET_TIME(end);
     printf("Program converged at %d th iteration.\nElapsed time %f.\n", iterationcount, end-start);
+
+    Lab4_saveoutput(r, nodecount, end-start);
 
     // post processing
     node_destroy(nodehead, nodecount);
