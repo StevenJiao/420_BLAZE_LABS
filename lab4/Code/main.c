@@ -16,6 +16,7 @@ struct node *nodehead;
 int nodecount;
 double *r, *last_r, *contribution;
 double *my_r, *my_contribution;
+double *recvcounts, *displs; // for MPI_Gatherv to specify how many elements to receive from each process
 int i, j;
 double damp_const;
 int iterationcount = 0;
@@ -79,6 +80,11 @@ int init(int argc, char* argv[]) {
     for ( i = 0; i < nodecount; ++i) {
         last_r[i] = 0.0;
         r[i] = 1.0 / nodecount;
+
+        // set the rev_counts and displs for MPI_Gatherv
+        recv_counts[i] = nodes_per_process;
+        displs[i] = nodes_per_process * i;
+
         // // Update only the local nodes that this process handles
         // if (i < nodes_per_process) {
         //     my_r[i] = r[i];
@@ -92,7 +98,7 @@ int init(int argc, char* argv[]) {
 int iteration() {
     if (my_rank == 0) {
         ++iterationcount;
-        vec_cp(r, r_pre, nodecount);
+        vec_cp(r, last_r, nodecount);
     }
 
     // calculate process's chunk of r_i
@@ -107,9 +113,11 @@ int iteration() {
     for (i = my_nodestart; i < my_nodeend && i < nodecount; ++i) {
         my_contribution[i - my_nodestart] = my_r[i - my_nodestart] / nodehead[i].num_out_links * DAMPING_FACTOR;
     }
-    // TODO: Update other processes
-    // MPI_Allgatherv();
 
+    // gather all chunks of r_i and update full r vector
+    MPI_Allgatherv(my_r, nodes_per_process, MPI_DOUBLE, 
+                    r, recvcounts, displs, MPI_DOUBLE, 
+                    MPI_COMM_WORLD);
 }
 
 int main(int argc, char* argv[]) {
@@ -137,6 +145,10 @@ int main(int argc, char* argv[]) {
     MPI_Finalize();
     node_destroy(nodehead, nodecount);
     free(contribution);
-
+    free(my_contribution);
+    free(r);
+    free(last_r);
+    free(my_r);
+   
     return 0;
 }
