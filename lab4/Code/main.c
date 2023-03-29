@@ -24,7 +24,7 @@ int processes, my_rank;
 FILE *ip;
 
 int nodes_per_process;
-int my_nodecount, my_nodestart, my_nodeend;
+int my_nodestart, my_nodeend;
 double error;
 
 int read_input() {
@@ -57,42 +57,56 @@ int init(int argc, char* argv[]) {
 
     // set our nodecount for each process (as well as ceiling of the nodes per process so we don't miss one)
     nodes_per_process = nodecount / processes + (nodecount % processes != 0);
-
-    // Initialize info for this process
-    my_nodecount = nodes_per_process;
+    // set the start and end i for this process
     my_nodestart = nodes_per_process * my_rank;
-    my_nodeend = nodes_per_process * (my_rank + 1);
+    my_nodeend = nodes_per_process * (my_rank + 1) - 1;
 
     // Initialize r vectors
     r = malloc(nodecount * sizeof(double));
     last_r = malloc(nodecount * sizeof(double));
-    my_r = malloc(my_nodecount * sizeof(double));
+    // stores local r values for each process
+    my_r = malloc(nodes_per_process * sizeof(double));
 
     // initialize contribution sum for j in D_i
     contribution = malloc(nodecount * sizeof(double));
-    my_contribution = malloc(my_nodecount * sizeof(double));
+    // stores local contribution values for each process
+    my_contribution = malloc(nodes_per_process * sizeof(double));
     for ( i = 0; i < nodecount; ++i)
         contribution[i] = r[i] / nodehead[i].num_out_links * DAMPING_FACTOR;
     damp_const = (1.0 - DAMPING_FACTOR) / nodecount;
 
-
     // Set starting values for the shared and local rank vectors, r_i(0) = 1/N
-    for ( i = 0; i < nodecount; ++i)
+    for ( i = 0; i < nodecount; ++i) {
         last_r[i] = 0.0;
         r[i] = 1.0 / nodecount;
-        // Update only the local nodes that this process handles
-        if (i < my_nodecount) {
-            my_r[i] = r[i];
-        }
+        // // Update only the local nodes that this process handles
+        // if (i < nodes_per_process) {
+        //     my_r[i] = r[i];
+        // }
+    }
 
     return 0;
 }
 
 // One iteration of the page rank calculation
 int iteration() {
+    if (my_rank == 0) {
+        ++iterationcount;
+        vec_cp(r, r_pre, nodecount);
+    }
 
-    // TODO: Calculate updates to my_r here
+    // calculate process's chunk of r_i
+    for (i = my_nodestart; i < my_nodeend && i < nodecount; ++i) {
+        my_r[i - my_nodestart] = damp_const;
+        for (j = 0; j < nodehead[i].num_in_links; ++j) {
+            my_r[i - my_nodestart] += contribution[nodehead[i].inlinks[j]];
+        }
+    }
 
+    // update this chunk of r_i contribution for r_(i+1)
+    for (i = my_nodestart; i < my_nodeend && i < nodecount; ++i) {
+        my_contribution[i - my_nodestart] = my_r[i - my_nodestart] / nodehead[i].num_out_links * DAMPING_FACTOR;
+    }
     // TODO: Update other processes
     // MPI_Allgatherv();
 
