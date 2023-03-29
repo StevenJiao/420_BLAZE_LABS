@@ -96,11 +96,6 @@ int init(int argc, char* argv[]) {
 
 // One iteration of the page rank calculation
 int iteration() {
-    if (my_rank == 0) {
-        ++iterationcount;
-        vec_cp(r, last_r, nodecount);
-    }
-
     // calculate process's chunk of r_i
     for (i = my_nodestart; i < my_nodeend && i < nodecount; ++i) {
         my_r[i - my_nodestart] = damp_const;
@@ -127,7 +122,15 @@ int main(int argc, char* argv[]) {
     GET_TIME(start);
 
     do {
+        // prep last_r and r for this iteration
+        if (my_rank == 0) {
+            ++iterationcount;
+            vec_cp(r, last_r, nodecount);
+        }
+
+        // perform the iteration chunk
         iteration();
+        
         // TODO: Calc error - rel_error(r, last_r, nodecount)
         // TODO: Update last_r - vec_cp(r, last_r, nodecount);
 
