@@ -10,7 +10,6 @@
 #define EPSILON 0.00001
 #define DAMPING_FACTOR 0.85
 
-#define THRESHOLD 0.0001
 
 int main(int argc, char* argv[])
 {
@@ -33,7 +32,6 @@ int main(int argc, char* argv[])
     
     // Initialize the graph
     if (node_init(&nodehead, 0, nodecount)) return 254;
-
 
     // Initialize r vectors, r_i(0) = 1/N
     r = malloc(nodecount * sizeof(double));

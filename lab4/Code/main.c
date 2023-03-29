@@ -14,7 +14,8 @@
 
 struct node *nodehead;
 int nodecount;
-double *r, *last_r, *my_r, *contribution;
+double *r, *last_r, *contribution;
+double *my_r, *my_contribution;
 int i, j;
 double damp_const;
 int iterationcount = 0;
@@ -47,22 +48,33 @@ int read_input() {
 int init(int argc, char* argv[]) {
 
     // Init MPI
-    MPI_Init(&argc, &argv);
+    MPI_Init(NULL, NULL);
     MPI_Comm_size(MPI_COMM_WORLD, &processes);
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 
-    // Get graph info from input file
+    // Get graph and nodecount info from input file
     if (read_input()) return 1;
+
+    // set our nodecount for each process (as well as ceiling of the nodes per process so we don't miss one)
+    nodes_per_process = nodecount / processes + (nodecount % processes != 0);
 
     // Initialize info for this process
     my_nodecount = nodes_per_process;
-    my_nodestart = my_rank * nodes_per_process;
-    my_nodeend = my_rank * nodes_per_process + (my_rank == 0);
+    my_nodestart = nodes_per_process * my_rank;
+    my_nodeend = nodes_per_process * (my_rank + 1);
 
     // Initialize r vectors
     r = malloc(nodecount * sizeof(double));
-    my_r = malloc(nodecount * sizeof(double));
     last_r = malloc(nodecount * sizeof(double));
+    my_r = malloc(my_nodecount * sizeof(double));
+
+    // initialize contribution sum for j in D_i
+    contribution = malloc(nodecount * sizeof(double));
+    my_contribution = malloc(my_nodecount * sizeof(double));
+    for ( i = 0; i < nodecount; ++i)
+        contribution[i] = r[i] / nodehead[i].num_out_links * DAMPING_FACTOR;
+    damp_const = (1.0 - DAMPING_FACTOR) / nodecount;
+
 
     // Set starting values for the shared and local rank vectors, r_i(0) = 1/N
     for ( i = 0; i < nodecount; ++i)
@@ -82,7 +94,7 @@ int iteration() {
     // TODO: Calculate updates to my_r here
 
     // TODO: Update other processes
-    MPI_Allgatherv();
+    // MPI_Allgatherv();
 
 }
 
@@ -103,7 +115,7 @@ int main(int argc, char* argv[]) {
 
     // Save output if master process
     if (my_rank == 0) {
-        printf("Program converged at %d th iteration - Elapsed time %f - Process %d out of %d\n", iterationcount, end-start, myrank + 1, processes);
+        printf("Program converged at %d th iteration - Elapsed time %f - Process %d out of %d\n", iterationcount, end-start, my_rank + 1, processes);
         Lab4_saveoutput(r, nodecount, end-start);
     }
 
