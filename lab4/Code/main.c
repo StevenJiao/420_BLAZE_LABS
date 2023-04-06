@@ -16,7 +16,7 @@ struct node *nodehead;
 int nodecount;
 double *r, *last_r, *contribution;
 double *my_r, *my_contribution;
-double *recvcounts, *displs; // for MPI_Gatherv to specify how many elements to receive from each process
+int *recvcounts, *displs; // for MPI_Gatherv to specify how many elements to receive from each process
 int i, j;
 double damp_const;
 int iterationcount = 0;
@@ -43,6 +43,7 @@ int read_input() {
     // Initialize the graph
     if (node_init(&nodehead, 0, nodecount)) return 1;
 
+    return 0;
 }
 
 // Setup for a single worker
@@ -76,26 +77,24 @@ int init(int argc, char* argv[]) {
         contribution[i] = r[i] / nodehead[i].num_out_links * DAMPING_FACTOR;
     damp_const = (1.0 - DAMPING_FACTOR) / nodecount;
 
+    recvcounts = malloc(nodecount * sizeof(int));
+    displs = malloc(nodecount * sizeof(int));
+
     // Set starting values for the shared and local rank vectors, r_i(0) = 1/N
     for ( i = 0; i < nodecount; ++i) {
         last_r[i] = 0.0;
         r[i] = 1.0 / nodecount;
 
-        // set the rev_counts and displs for MPI_Gatherv
-        recv_counts[i] = nodes_per_process;
+        // set the revcounts and displs for MPI_Gatherv
+        recvcounts[i] = nodes_per_process;
         displs[i] = nodes_per_process * i;
-
-        // // Update only the local nodes that this process handles
-        // if (i < nodes_per_process) {
-        //     my_r[i] = r[i];
-        // }
     }
 
     return 0;
 }
 
 // One iteration of the page rank calculation
-int iteration() {
+void iteration() {
     // calculate process's chunk of r_i
     for (i = my_nodestart; i < my_nodeend && i < nodecount; ++i) {
         my_r[i - my_nodestart] = damp_const;
@@ -118,7 +117,7 @@ int iteration() {
 int main(int argc, char* argv[]) {
 
     // Setup each process and then start timing
-    init(&argc, &argv);
+    init(argc, argv);
     GET_TIME(start);
 
     do {
