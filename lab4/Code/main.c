@@ -131,9 +131,10 @@ int main(int argc, char* argv[]) {
         // perform the iteration chunk
         iteration();
         
-        // TODO: Calc error - rel_error(r, last_r, nodecount)
-        // TODO: Update last_r - vec_cp(r, last_r, nodecount);
-
+        // calculate error for this iteration
+        if (my_rank == 0) {
+            error = rel_error(r, last_r, nodecount);
+        }
     } while (error >= EPSILON);
 
     GET_TIME(end);
