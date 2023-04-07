@@ -15,11 +15,14 @@ all: main datatrim serialtester
 run:
 	mpirun -np ${num_p} ./${MAIN_EXECUTABLE}
 
+run-distrib:
+	mpirun -np ${num_p} --hostfile ~/hosts ./${MAIN_EXECUTABLE}
+
 main: lab4io.o
 	${MPI} ${CFLAGS} main.c Lab4_IO.o -o main -lm
 
 main-serial: lab4io.o
-	${MPI} ${CFLAGS} main_serial.c Lab4_IO.o -o main -lm
+	${MPI} ${CFLAGS} main_serial.c Lab4_IO.o -o main-serial -lm
 
 lab4io.o: Lab4_IO.c
 	${CC} ${CFLAGS} -c Lab4_IO.c -o Lab4_IO.o
@@ -35,8 +38,8 @@ serialtester:
 	${CC} ${CFLAGS} serialtester.c Lab4_IO.c -o serialtester -lm
 
 # will only work when logged into master node
-move_to_nodes: main generate-data
-	scp -r ${MAIN_EXECUTABLE} ${GENERATED_DATA_FILES} user_07@192.168.1.55:;scp -r ${MAIN_EXECUTABLE} ${GENERATED_DATA_FILES} user_07@192.168.1.88:;scp -r ${MAIN_EXECUTABLE} ${GENERATED_DATA_FILES} user_07@192.168.1.104:;
+move_to_nodes: main
+	cp ${MAIN_EXECUTABLE} ~/;cp ${GENERATED_DATA_FILES} ~/;scp -r ${MAIN_EXECUTABLE} ${GENERATED_DATA_FILES} user_07@192.168.1.55:;scp -r ${MAIN_EXECUTABLE} ${GENERATED_DATA_FILES} user_07@192.168.1.88:;scp -r ${MAIN_EXECUTABLE} ${GENERATED_DATA_FILES} user_07@192.168.1.104:;
 
 # Zip files for submission
 submission:
