@@ -102,11 +102,11 @@ void iteration() {
         my_contribution[i - my_nodestart] = my_r[i - my_nodestart] / nodehead[i].num_out_links * DAMPING_FACTOR;
     }
 
-    // gather all chunks of r_i and update full r vector
+    // gather all chunks of r_i and update full r vector for just master process
     MPI_Gather(my_r, nodes_per_process, MPI_DOUBLE, 
                     r, nodes_per_process, MPI_DOUBLE, 
                     0, MPI_COMM_WORLD);
-    // gather all chunks of r_i contribution and update full contribution vector
+    // gather all chunks of D_i and update full contribution vector for next iteration for all processes.
     MPI_Allgather(my_contribution, nodes_per_process, MPI_DOUBLE, 
                 contribution, nodes_per_process, MPI_DOUBLE, 
                 MPI_COMM_WORLD);
