@@ -6,7 +6,7 @@ CFLAGS = -Wall
 CXXFLAGS = -Wall -std=gnu++0x
 MAIN_EXECUTABLE = main
 OTHER_EXECUTABLE = serialtester datatrim
-GENERATED_DATA_FILES = data_input_link data_input_meta
+GENERATED_DATA_FILES = data_input_link data_input_meta data_output
 LAB_NUM = 4
 
 all: main datatrim serialtester
@@ -42,8 +42,8 @@ move_to_nodes: main
 	cp ${MAIN_EXECUTABLE} ~/;cp ${GENERATED_DATA_FILES} ~/;scp -r ${MAIN_EXECUTABLE} ${GENERATED_DATA_FILES} user_07@192.168.1.55:;scp -r ${MAIN_EXECUTABLE} ${GENERATED_DATA_FILES} user_07@192.168.1.88:;scp -r ${MAIN_EXECUTABLE} ${GENERATED_DATA_FILES} user_07@192.168.1.104:;
 
 # Zip files for submission
-submission:
-	cd ..; zip -r 1535268.zip Code/ Members/ Report/ -x \main \*.o \*.zip \web-Stanford.txt
+submission: clean
+	cd ..; zip -r 1535268.zip Code/ Members/ Report/ -x \main \*.o \*.zip Code/web-Stanford*
 
 # Send all files to lab machine for testing
 teleport-all: submission
