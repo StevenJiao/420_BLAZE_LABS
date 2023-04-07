@@ -21,11 +21,11 @@ double damp_const;
 int iterationcount = 0;
 double start, end;
 int processes, my_rank;
+int continue_flag = 1;
 FILE *ip;
 
 int nodes_per_process;
 int my_nodestart, my_nodeend;
-double error;
 
 int read_input() {
 
@@ -77,7 +77,7 @@ int init(int argc, char* argv[]) {
     for ( i = 0; i < nodecount; ++i)
         contribution[i] = r[i] / nodehead[i].num_out_links * DAMPING_FACTOR;
     damp_const = (1.0 - DAMPING_FACTOR) / nodecount;
-    
+
     // Set starting values for the shared and local rank vectors, r_i(0) = 1/N
     for ( i = 0; i < nodecount; ++i) {
         last_r[i] = 0.0;
@@ -103,13 +103,14 @@ void iteration() {
     }
 
     // gather all chunks of r_i and update full r vector
-    MPI_Gather(my_contribution, nodes_per_process, MPI_DOUBLE, 
-                    contribution, nodes_per_process, MPI_DOUBLE, 
+    MPI_Gather(my_r, nodes_per_process, MPI_DOUBLE, 
+                    r, nodes_per_process, MPI_DOUBLE, 
                     0, MPI_COMM_WORLD);
     // gather all chunks of r_i contribution and update full contribution vector
-    MPI_Allgather(my_r, nodes_per_process, MPI_DOUBLE, 
-                    r, nodes_per_process, MPI_DOUBLE, 
-                    MPI_COMM_WORLD);
+    MPI_Allgather(my_contribution, nodes_per_process, MPI_DOUBLE, 
+                contribution, nodes_per_process, MPI_DOUBLE, 
+                MPI_COMM_WORLD);
+
 }
 
 int main(int argc, char* argv[]) {
@@ -130,9 +131,10 @@ int main(int argc, char* argv[]) {
         
         // calculate error for this iteration
         if (my_rank == 0) {
-            error = rel_error(r, last_r, nodecount);
+            continue_flag = (rel_error(r, last_r, nodecount) >= EPSILON);
         }
-    } while (error >= EPSILON);
+        MPI_Bcast(&continue_flag, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    } while (continue_flag);
 
     GET_TIME(end);
 
