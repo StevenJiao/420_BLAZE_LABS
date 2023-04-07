@@ -16,7 +16,6 @@ struct node *nodehead;
 int nodecount;
 double *r, *last_r, *contribution;
 double *my_r, *my_contribution;
-int *recvcounts, *displs; // for MPI_Gatherv to specify how many elements to receive from each process
 int i, j;
 double damp_const;
 int iterationcount = 0;
@@ -78,18 +77,11 @@ int init(int argc, char* argv[]) {
     for ( i = 0; i < nodecount; ++i)
         contribution[i] = r[i] / nodehead[i].num_out_links * DAMPING_FACTOR;
     damp_const = (1.0 - DAMPING_FACTOR) / nodecount;
-
-    recvcounts = malloc(nodecount * sizeof(int));
-    displs = malloc(nodecount * sizeof(int));
-
+    
     // Set starting values for the shared and local rank vectors, r_i(0) = 1/N
     for ( i = 0; i < nodecount; ++i) {
         last_r[i] = 0.0;
         r[i] = 1.0 / nodecount;
-
-        // set the revcounts and displs for MPI_Gatherv
-        recvcounts[i] = nodes_per_process;
-        displs[i] = nodes_per_process * i;
     }
 
     return 0;
@@ -111,12 +103,12 @@ void iteration() {
     }
 
     // gather all chunks of r_i and update full r vector
-    MPI_Gatherv(my_r, nodes_per_process, MPI_DOUBLE, 
-                    r, recvcounts, displs, MPI_DOUBLE, 
+    MPI_Gather(my_contribution, nodes_per_process, MPI_DOUBLE, 
+                    contribution, nodes_per_process, MPI_DOUBLE, 
                     0, MPI_COMM_WORLD);
     // gather all chunks of r_i contribution and update full contribution vector
-    MPI_Allgatherv(my_contribution, nodes_per_process, MPI_DOUBLE, 
-                    contribution, recvcounts, displs, MPI_DOUBLE, 
+    MPI_Allgather(my_r, nodes_per_process, MPI_DOUBLE, 
+                    r, nodes_per_process, MPI_DOUBLE, 
                     MPI_COMM_WORLD);
 }
 
