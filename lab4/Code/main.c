@@ -64,7 +64,7 @@ int init(int argc, char* argv[]) {
     // set total number of elements since we may not perfectly divide the nodes equally for all processes, there will be extras
     total_elements = nodes_per_process * processes;
 
-    printf("total: %i, processes: %i, nodes per: %i, start: %i, end: %i\n", nodecount, processes, nodes_per_process, my_nodestart, my_nodeend);
+    // printf("total: %i, processes: %i, nodes per: %i, start: %i, end: %i\n", nodecount, processes, nodes_per_process, my_nodestart, my_nodeend);
 
     // Initialize r vectors
     r = malloc(total_elements * sizeof(double));
