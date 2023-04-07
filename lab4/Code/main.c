@@ -63,6 +63,8 @@ int init(int argc, char* argv[]) {
     my_nodestart = nodes_per_process * my_rank;
     my_nodeend = nodes_per_process * (my_rank + 1) - 1;
 
+    printf("total: %i, processes: %i, nodes per: %i, start: %i, end: %i\n", nodecount, processes, nodes_per_process, my_nodestart, my_nodeend);
+
     // Initialize r vectors
     r = malloc(nodecount * sizeof(double));
     last_r = malloc(nodecount * sizeof(double));
@@ -96,7 +98,7 @@ int init(int argc, char* argv[]) {
 // One iteration of the page rank calculation
 void iteration() {
     // calculate process's chunk of r_i
-    for (i = my_nodestart; i < my_nodeend && i < nodecount; ++i) {
+    for (i = my_nodestart; i <= my_nodeend && i < nodecount; ++i) {
         my_r[i - my_nodestart] = damp_const;
         for (j = 0; j < nodehead[i].num_in_links; ++j) {
             my_r[i - my_nodestart] += contribution[nodehead[i].inlinks[j]];
@@ -104,13 +106,17 @@ void iteration() {
     }
 
     // update this chunk of r_i contribution for r_(i+1)
-    for (i = my_nodestart; i < my_nodeend && i < nodecount; ++i) {
+    for (i = my_nodestart; i <= my_nodeend && i < nodecount; ++i) {
         my_contribution[i - my_nodestart] = my_r[i - my_nodestart] / nodehead[i].num_out_links * DAMPING_FACTOR;
     }
 
     // gather all chunks of r_i and update full r vector
-    MPI_Allgatherv(my_r, nodes_per_process, MPI_DOUBLE, 
+    MPI_Gatherv(my_r, nodes_per_process, MPI_DOUBLE, 
                     r, recvcounts, displs, MPI_DOUBLE, 
+                    0, MPI_COMM_WORLD);
+    // gather all chunks of r_i contribution and update full contribution vector
+    MPI_Allgatherv(my_contribution, nodes_per_process, MPI_DOUBLE, 
+                    contribution, recvcounts, displs, MPI_DOUBLE, 
                     MPI_COMM_WORLD);
 }
 
